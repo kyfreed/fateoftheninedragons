@@ -86,8 +86,38 @@ verbs.southwest = function(num) {
   if (coordinates[1] - num2 >= 0 && coordinates[0] - num2 >= 0) {
     coordinates[1] -= num2;
     coordinates[0] -= num2;
-    document.getElementById('info').innerHTML += 'You moved ' + num2 + ((num2 > 1 || num2 <= 0) && num2 != -1 ? ' spaces south' : ' space south') + ' to ' + coordinates.toString() + '.<br>';
+    document.getElementById('info').innerHTML += 'You moved ' + num2 + ((num2 > 1 || num2 <= 0) && num2 != -1 ? ' spaces southwest' : ' space southwest') + ' to ' + coordinates.toString() + '.<br>';
   } else {
     document.getElementById('info').innerHTML += 'That\'s too far! <br>';
   }
+}
+verbs.northwest = function(num) {
+  var num2 = parseInt(num)
+  if (coordinates[1] + num2 <= 2047 && coordinates[0] - num2 >= 0) {
+    coordinates[1] += num2;
+    coordinates[0] -= num2;
+    document.getElementById('info').innerHTML += 'You moved ' + num2 + ((num2 > 1 || num2 <= 0) && num2 != -1 ? ' spaces northwest' : ' space northwest') + ' to ' + coordinates.toString() + '.<br>';
+  } else {
+    document.getElementById('info').innerHTML += 'That\'s too far! <br>';
+  }
+}
+verbs.northeast = function(num) {
+  var num2 = parseInt(num)
+  if (coordinates[1] + num2 <= 2047 && coordinates[0] + num2 <= 2047) {
+    coordinates[1] += num2;
+    coordinates[0] += num2;
+    document.getElementById('info').innerHTML += 'You moved ' + num2 + ((num2 > 1 || num2 <= 0) && num2 != -1 ? ' spaces northeast' : ' space northeast') + ' to ' + coordinates.toString() + '.<br>';
+  } else {
+    document.getElementById('info').innerHTML += 'That\'s too far! <br>';
+  }
+}
+verbs.save = function(){
+  var hex = '';
+  for(var i=0;i<name.length;i++){
+    hex += name.charCodeAt(i).toString(16) + 'x';
+  }
+  hex += 'z'
+  hex += coordinates[0].toString(16) + 'z';
+  hex += coordinates[1].toString(16) + 'z';
+  alert('Here is your save string. Copy it and paste it in a safe place.\n\n\n' + hex); 
 }
