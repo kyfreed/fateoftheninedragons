@@ -1,0 +1,93 @@
+document.body.onkeyup = (function(e) {
+  if (e.keyCode == 32) {
+    $('#intro').remove();
+    play();
+  }
+})
+var blink = setInterval(function() {
+  $('#space').toggle();
+}, 1000);
+
+function play() {
+  if (confirm('Load a game?')) {
+
+  } else {
+    var name = prompt('What is your name?');
+    coordinates = [0, 0];
+    console.log(name + ', you are at ' + coordinates.toString());
+  }
+  loop()
+}
+
+function loop() {
+  do {
+    var command = prompt('Enter a command');
+    var command_words = command.split(' ');
+    var params = command_words.slice(1);
+    if (verbs[command_words[0]]) {
+      verbs[command_words[0]](params);
+    }
+  } while (!verbs[command_words[0]]);
+  var whatever = setTimeout(loop, 1000);
+}
+var coordinates;
+var verbs = {};
+verbs.east = function(num) {
+  var num2 = parseInt(num)
+  if (coordinates[0] += num2 <= 2047) {
+    coordinates[0] += num2;
+    coordinates[0] -= 1;
+    document.getElementById('info').innerHTML += 'You moved ' + num2 + ((num2 > 1 || num2 <= 0) && num2 != -1 ? ' spaces east' : ' space east') + ' to ' + coordinates.toString() + '.<br>';
+  } else {
+    document.getElementById('info').innerHTML += 'That\'s too far! <br>'
+  }
+}
+verbs.west = function(num) {
+  var num2 = parseInt(num)
+  if (coordinates[0] - num2 >= 0) {
+    coordinates[0] -= num2;
+    coordinates[0] += 1;
+    document.getElementById('info').innerHTML += 'You moved ' + num2 + ((num2 > 1 || num2 <= 0) && num2 != -1 ? ' spaces west' : ' space west') + ' to ' + coordinates.toString() + '. <br>';
+  } else {
+    document.getElementById('info').innerHTML += 'That\'s too far! <br>';
+  }
+}
+verbs.north = function(num) {
+  var num2 = parseInt(num)
+  if (coordinates[1] + num2 <= 2047) {
+    coordinates[1] += num2;
+    document.getElementById('info').innerHTML += 'You moved ' + num2 + ((num2 > 1 || num2 <= 0) && num2 != -1 ? ' spaces north' : ' space north') + ' to ' + coordinates.toString() + '.<br>';
+  } else {
+    document.getElementById('info').innerHTML += 'That\'s too far! <br>'
+  }
+}
+verbs.south = function(num) {
+  var num2 = parseInt(num)
+  if (coordinates[1] - num2 >= 0) {
+    coordinates[1] -= num2;
+    coordinates[1] += 1;
+    document.getElementById('info').innerHTML += 'You moved ' + num2 + ((num2 > 1 || num2 <= 0) && num2 != -1 ? ' spaces south' : ' space south') + ' to ' + coordinates.toString() + '.<br>';
+  } else {
+    document.getElementById('info').innerHTML += 'That\'s too far! <br>'
+  }
+}
+verbs.southeast = function(num) {
+  var num2 = parseInt(num)
+  if (coordinates[1] - num2 >= 0 && coordinates[0] + num2 <= 2047) {
+    coordinates[1] -= num2;
+    coordinates[0] += num2;
+    document.getElementById('info').innerHTML += 'You moved ' + num2 + ((num2 > 1 || num2 <= 0) && num2 != -1 ? ' spaces southeast' : ' space southeast') + ' to ' + coordinates.toString() + '.<br>';
+  } else {
+    document.getElementById('info').innerHTML += 'That\'s too far! <br>'
+  }
+}
+verbs.southwest = function(num) {
+  var num2 = parseInt(num)
+  if (coordinates[1] - num2 >= 0 && coordinates[0] - num2 >= 0) {
+    coordinates[1] -= num2;
+    coordinates[0] -= num2;
+    document.getElementById('info').innerHTML += 'You moved ' + num2 + ((num2 > 1 || num2 <= 0) && num2 != -1 ? ' spaces south' : ' space south') + ' to ' + coordinates.toString() + '.<br>';
+  } else {
+    document.getElementById('info').innerHTML += 'That\'s too far! <br>';
+  }
+}
