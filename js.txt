@@ -9,6 +9,10 @@ var blink = setInterval(function() {
 }, 1000);
 var name = '';
 var coordinates = [];
+var health;
+var maxHealth;
+var gold;
+var maxGold;
 function play() {
   if (confirm('Load a game?')) {
     var save = prompt('Enter your save string:');
@@ -21,12 +25,38 @@ function play() {
     }
     console.log(name);
     save = save.slice(1);
-    coordinates[0] = parseInt(save.slice(0, save.indexOf('z')),16);
-    coordinates[1] = parseInt(save.slice(0, save.indexOf('z')),16);
-    console.log(coordinates);
+    var substring = parseInt(save.slice(0, save.indexOf('z')),16);
+    coordinates[0] = substring;
+    substring = substring.toString();
+    save = save.slice(substring.length);
+    substring = parseInt(save.slice(0, save.indexOf('z')),16);
+    coordinates[1] = substring;
+    substring = substring.toString();
+    save = save.slice(substring.length + 1);
+    console.log(save);
+    substring = parseInt(save.slice(0, save.indexOf('z')),16);
+    health = substring;
+    substring = substring.toString();
+    save = save.slice(substring.length);
+    substring = parseInt(save.slice(0, save.indexOf('z')),16);
+    maxHealth = substring;
+    substring = substring.toString();
+    save = save.slice(substring.length);
+    substring = parseInt(save.slice(0, save.indexOf('z')),16);
+    gold = substring;
+    substring = substring.toString();
+    save = save.slice(substring.length);
+    substring = parseInt(save.slice(0, save.indexOf('z')),16);
+    maxGold = substring;
+    substring = substring.toString();
+    save = save.slice(substring.length);
   } else {
     name = prompt('What is your name?');
     coordinates = [0, 0];
+	  health = 15;
+    maxHealth = 15;
+    gold = 100;
+    maxGold = 100;
   }
   loop()
 }
@@ -131,8 +161,12 @@ verbs.save = function(){
   hex += 'z'
   hex += coordinates[0].toString(16) + 'z';
   hex += coordinates[1].toString(16) + 'z';
+  hex += health.toString(16) + 'z';
+  hex += maxHealth.toString(16) + 'z';
+  hex += gold.toString(16) + 'z';
+  hex += maxGold.toString(16) + 'z';
   prompt('Here is your save string. Copy it and paste it in a safe place.',hex);
 }
 verbs.stats = function(){
-  document.getElementById('info').innerHTML += 'Your coordinates are ' + coordinates.toString(); + '.\n';
+  document.getElementById('info').innerHTML += 'Your coordinates are ' + coordinates.toString() + '.\nYou have ' + health + ' health remaining.\nYou have ' + gold + ' gold.\n';
 }
