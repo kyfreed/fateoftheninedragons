@@ -32,16 +32,18 @@ function play() {
     substring = parseInt(save.slice(0, save.indexOf('z')),16);
     coordinates[1] = substring;
     substring = substring.toString();
-    save = save.slice(substring.length + 1);
+    save = save.slice(substring.length + 2);
     console.log(save);
     substring = parseInt(save.slice(0, save.indexOf('z')),16);
     health = substring;
     substring = substring.toString();
     save = save.slice(substring.length);
+    console.log(save);
     substring = parseInt(save.slice(0, save.indexOf('z')),16);
     maxHealth = substring;
     substring = substring.toString();
     save = save.slice(substring.length);
+    console.log(save);
     substring = parseInt(save.slice(0, save.indexOf('z')),16);
     gold = substring;
     substring = substring.toString();
@@ -168,5 +170,5 @@ verbs.save = function(){
   prompt('Here is your save string. Copy it and paste it in a safe place.',hex);
 }
 verbs.stats = function(){
-  document.getElementById('info').innerHTML += 'Your coordinates are ' + coordinates.toString() + '.\nYou have ' + health + ' health remaining.\nYou have ' + gold + ' gold.\n';
+  document.getElementById('info').innerHTML += 'Your coordinates are ' + coordinates.toString() + '.<br>You have ' + health + ' health remaining.<br>You have ' + gold + ' gold.<br>';
 }
