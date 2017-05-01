@@ -7,12 +7,17 @@ document.body.onkeyup = (function(e) {
 var blink = setInterval(function() {
   $('#space').toggle();
 }, 1000);
+var count = 0;
+var say = false;
 var name = '';
 var coordinates = [];
 var health;
 var maxHealth;
 var gold;
 var maxGold;
+var inventory = [];
+var stores = [[50,50]];
+var inns = [[51,50]];
 function play() {
   if (confirm('Load a game?')) {
     var save = prompt('Enter your save string:');
@@ -76,80 +81,270 @@ function loop() {
 }
 var verbs = {};
 verbs.east = function(num) {
-  var num2 = parseInt(num)
-  if (coordinates[0] += num2 <= 2047) {
-    coordinates[0] += num2;
+  count = 0;
+  say = false;
+  var num2 = parseInt(num);
+  for(var i=0;i<num2;i++){
+    count++;
+    if(Math.random() * 99 <= 2){
+      say = true;
+      break;
+    }
+  }
+  if (coordinates[0] += count <= 2047) {
+    coordinates[0] += count;
     coordinates[0] -= 1;
-    document.getElementById('info').innerHTML += 'You moved ' + num2 + ((num2 > 1 || num2 <= 0) && num2 != -1 ? ' spaces east' : ' space east') + ' to ' + coordinates.toString() + '.<br>';
+    document.getElementById('info').innerHTML += 'You moved ' + count + ((count > 1 || count <= 0) && count != -1 ? ' spaces east' : ' space east') + ' to ' + coordinates.toString() + '.<br>';
+    if(say){
+      document.getElementById('info').innerHTML += 'You encountered a Shadow Creature!<br>';
+    }
+    for(var i=0;i<stores.length;i++){
+      if(stores[i] == coordinates){
+        landedOnStore()
+      }
+    }
+    for(var i=0;i<inns.length;i++){
+      if(inns[i] == coordinates){
+        landedOnInn()
+      }
+    }
   } else {
     document.getElementById('info').innerHTML += 'That\'s too far! <br>'
   }
 }
 verbs.west = function(num) {
   var num2 = parseInt(num)
-  if (coordinates[0] - num2 >= 0) {
-    coordinates[0] -= num2;
+  count = 0;
+  say = false;
+  var num2 = parseInt(num);
+  for(var i=0;i<num2;i++){
+    count++;
+    if(Math.random() * 99 <= 1){
+      say = true;
+      break;
+    }
+  }
+  if (coordinates[0] - count >= 0) {
+    coordinates[0] -= count;
     coordinates[0] += 1;
-    document.getElementById('info').innerHTML += 'You moved ' + num2 + ((num2 > 1 || num2 <= 0) && num2 != -1 ? ' spaces west' : ' space west') + ' to ' + coordinates.toString() + '. <br>';
+    document.getElementById('info').innerHTML += 'You moved ' + count + ((count > 1 || count <= 0) && count != -1 ? ' spaces west' : ' space west') + ' to ' + coordinates.toString() + '. <br>';
+    if(say){
+      document.getElementById('info').innerHTML += 'You encountered a Shadow Creature!<br>';
+      combat()
+    }
+    for(var i=0;i<stores.length;i++){
+      if(stores[i] == coordinates){
+        landedOnStore()
+      }
+    }
+    for(var i=0;i<inns.length;i++){
+      if(inns[i] == coordinates){
+        landedOnInn()
+      }
+    }
   } else {
     document.getElementById('info').innerHTML += 'That\'s too far! <br>';
   }
 }
 verbs.north = function(num) {
   var num2 = parseInt(num)
-  if (coordinates[1] + num2 <= 2047) {
-    coordinates[1] += num2;
-    document.getElementById('info').innerHTML += 'You moved ' + num2 + ((num2 > 1 || num2 <= 0) && num2 != -1 ? ' spaces north' : ' space north') + ' to ' + coordinates.toString() + '.<br>';
+  count = 0;
+  say = false;
+  var num2 = parseInt(num);
+  for(var i=0;i<num2;i++){
+    count++;
+    if(Math.random() * 99 <= 1){
+      say = true;
+      break;
+    }
+  }
+  if (coordinates[1] + count <= 2047) {
+    coordinates[1] += count;
+    document.getElementById('info').innerHTML += 'You moved ' + count + ((count > 1 || count <= 0) && count != -1 ? ' spaces north' : ' space north') + ' to ' + coordinates.toString() + '.<br>';
+    if(say){
+      document.getElementById('info').innerHTML += 'You encountered a Shadow Creature!<br>';
+      combat()
+    }
+    for(var i=0;i<stores.length;i++){
+      if(stores[i] == coordinates){
+        landedOnStore()
+      }
+    }
+    for(var i=0;i<inns.length;i++){
+      if(inns[i] == coordinates){
+        landedOnInn()
+      }
+    }
   } else {
     document.getElementById('info').innerHTML += 'That\'s too far! <br>'
   }
 }
 verbs.south = function(num) {
   var num2 = parseInt(num)
-  if (coordinates[1] - num2 >= 0) {
-    coordinates[1] -= num2;
+  count = 0;
+  say = false;
+  var num2 = parseInt(num);
+  for(var i=0;i<num2;i++){
+    count++;
+    if(Math.random() * 99 <= 1){
+      say = true;
+      break;
+    }
+  }
+  if (coordinates[1] - count >= 0) {
+    coordinates[1] -= count;
     coordinates[1] += 1;
-    document.getElementById('info').innerHTML += 'You moved ' + num2 + ((num2 > 1 || num2 <= 0) && num2 != -1 ? ' spaces south' : ' space south') + ' to ' + coordinates.toString() + '.<br>';
+    document.getElementById('info').innerHTML += 'You moved ' + count + ((count > 1 || count <= 0) && count != -1 ? ' spaces south' : ' space south') + ' to ' + coordinates.toString() + '.<br>';
+    if(say){
+      document.getElementById('info').innerHTML += 'You encountered a Shadow Creature!<br>';
+      combat()
+    }
+    for(var i=0;i<stores.length;i++){
+      if(stores[i] == coordinates){
+        landedOnStore()
+      }
+    }
+    for(var i=0;i<inns.length;i++){
+      if(inns[i] == coordinates){
+        landedOnInn()
+      }
+    }
   } else {
     document.getElementById('info').innerHTML += 'That\'s too far! <br>'
   }
 }
 verbs.southeast = function(num) {
   var num2 = parseInt(num)
-  if (coordinates[1] - num2 >= 0 && coordinates[0] + num2 <= 2047) {
-    coordinates[1] -= num2;
-    coordinates[0] += num2;
-    document.getElementById('info').innerHTML += 'You moved ' + num2 + ((num2 > 1 || num2 <= 0) && num2 != -1 ? ' spaces southeast' : ' space southeast') + ' to ' + coordinates.toString() + '.<br>';
+  count = 0;
+  say = false;
+  var num2 = parseInt(num);
+  for(var i=0;i<num2;i++){
+    count++;
+    if(Math.random() * 99 <= 1){
+      say = true;
+      break;
+    }
+  }
+  if (coordinates[1] - count >= 0 && coordinates[0] + count <= 2047) {
+    coordinates[1] -= count;
+    coordinates[0] += count;
+    document.getElementById('info').innerHTML += 'You moved ' + count + ((count > 1 || count <= 0) && count != -1 ? ' spaces southeast' : ' space southeast') + ' to ' + coordinates.toString() + '.<br>';
+    if(say){
+      document.getElementById('info').innerHTML += 'You encountered a Shadow Creature!<br>';
+      combat()
+    }
+    for(var i=0;i<stores.length;i++){
+      if(stores[i] == coordinates){
+        landedOnStore()
+      }
+    }
+    for(var i=0;i<inns.length;i++){
+      if(inns[i] == coordinates){
+        landedOnInn()
+      }
+    }
   } else {
     document.getElementById('info').innerHTML += 'That\'s too far! <br>'
   }
 }
 verbs.southwest = function(num) {
   var num2 = parseInt(num)
-  if (coordinates[1] - num2 >= 0 && coordinates[0] - num2 >= 0) {
-    coordinates[1] -= num2;
-    coordinates[0] -= num2;
-    document.getElementById('info').innerHTML += 'You moved ' + num2 + ((num2 > 1 || num2 <= 0) && num2 != -1 ? ' spaces southwest' : ' space southwest') + ' to ' + coordinates.toString() + '.<br>';
+  count = 0;
+  say = false;
+  var num2 = parseInt(num);
+  for(var i=0;i<num2;i++){
+    count++;
+    if(Math.random() * 99 <= 1){
+      say = true;
+      break;
+    }
+  }
+  if (coordinates[1] - count >= 0 && coordinates[0] - count >= 0) {
+    coordinates[1] -= count;
+    coordinates[0] -= count;
+    document.getElementById('info').innerHTML += 'You moved ' + count + ((count > 1 || count <= 0) && count != -1 ? ' spaces southwest' : ' space southwest') + ' to ' + coordinates.toString() + '.<br>';
+    if(say){
+      document.getElementById('info').innerHTML += 'You encountered a Shadow Creature!<br>';
+      combat()
+    }
+    for(var i=0;i<stores.length;i++){
+      if(stores[i] == coordinates){
+        landedOnStore()
+      }
+    }
+    for(var i=0;i<inns.length;i++){
+      if(inns[i] == coordinates){
+        landedOnInn()
+      }
+    }
   } else {
     document.getElementById('info').innerHTML += 'That\'s too far! <br>';
   }
 }
 verbs.northwest = function(num) {
-  var num2 = parseInt(num)
+  var num2 = parseInt(num);
+  count = 0;
+  say = false;
+  var num2 = parseInt(num);
+  for(var i=0;i<num2;i++){
+    count++;
+    if(Math.random() * 99 <= 1){
+      say = true;
+      break;
+    }
+  }
   if (coordinates[1] + num2 <= 2047 && coordinates[0] - num2 >= 0) {
     coordinates[1] += num2;
     coordinates[0] -= num2;
     document.getElementById('info').innerHTML += 'You moved ' + num2 + ((num2 > 1 || num2 <= 0) && num2 != -1 ? ' spaces northwest' : ' space northwest') + ' to ' + coordinates.toString() + '.<br>';
+     if(say){
+      document.getElementById('info').innerHTML += 'You encountered a Shadow Creature!<br>';
+      combat()
+    }
+    for(var i=0;i<stores.length;i++){
+      if(stores[i] == coordinates){
+        landedOnStore()
+      }
+    }
+    for(var i=0;i<inns.length;i++){
+      if(inns[i] == coordinates){
+        landedOnInn()
+      }
+    }
   } else {
     document.getElementById('info').innerHTML += 'That\'s too far! <br>';
   }
 }
 verbs.northeast = function(num) {
   var num2 = parseInt(num)
-  if (coordinates[1] + num2 <= 2047 && coordinates[0] + num2 <= 2047) {
-    coordinates[1] += num2;
-    coordinates[0] += num2;
-    document.getElementById('info').innerHTML += 'You moved ' + num2 + ((num2 > 1 || num2 <= 0) && num2 != -1 ? ' spaces northeast' : ' space northeast') + ' to ' + coordinates.toString() + '.<br>';
+  count = 0;
+  say = false;
+  var num2 = parseInt(num);
+  for(var i=0;i<num2;i++){
+    count++;
+    if(Math.random() * 99 <= 1){
+      say = true;
+      break;
+    }
+  }
+  if (coordinates[1] + count <= 2047 && coordinates[0] + count <= 2047) {
+    coordinates[1] += count;
+    coordinates[0] += count;
+    document.getElementById('info').innerHTML += 'You moved ' + count + ((count > 1 || count <= 0) && count != -1 ? ' spaces northeast' : ' space northeast') + ' to ' + coordinates.toString() + '.<br>';
+    if(say){
+      document.getElementById('info').innerHTML += 'You encountered a Shadow Creature!<br>';
+      combat()
+    }
+    for(var i=0;i<stores.length;i++){
+      if(stores[i] == coordinates){
+        landedOnStore()
+      }
+    }
+    for(var i=0;i<inns.length;i++){
+      if(inns[i] == coordinates){
+        landedOnInn()
+      }
+    }
   } else {
     document.getElementById('info').innerHTML += 'That\'s too far! <br>';
   }
@@ -172,3 +367,32 @@ verbs.save = function(){
 verbs.stats = function(){
   document.getElementById('info').innerHTML += 'Your coordinates are ' + coordinates.toString() + '.<br>You have ' + health + ' health remaining.<br>You have ' + gold + ' gold.<br>';
 }
+function combat(){
+  var hasASword = false;
+  feedback('It is a generic Shadow Creature.')
+  for(var i=0;i<inventory.length;i++){
+    if(inventory[i] == 'sword'){
+      hasASword = true;
+      break;
+    }
+  }
+  if(hasASword == false){
+    feedback('However, you do not have a sword, so you are forced to run away!')
+    return;
+  }
+}
+function feedback(message){
+  document.getElementById('info') += message + '<br>';
+}
+function landedOnStore(){
+  var swordAvailable = true;
+  for(var i=0;i<inventory.length;i++){
+    if(inventory[i] == 'sword'){
+      swordAvailable = false;
+      break;
+    }
+  }
+    if(swordAvailable){
+      document.getElementById('info').innerHTML += 'Sword: 25 gold<br>';
+    }
+  }
