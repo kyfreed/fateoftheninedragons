@@ -299,7 +299,7 @@ verbs.northwest = function(num) {
     document.getElementById('info').innerHTML += 'You moved ' + num2 + ((num2 > 1 || num2 <= 0) && num2 != -1 ? ' spaces northwest' : ' space northwest') + ' to ' + coordinates.toString() + '.<br>';
      if(say){
       document.getElementById('info').innerHTML += 'You encountered a Shadow Creature!<br>';
-      combat()
+      combat();
     }
     for(var i=0;i<stores.length;i++){
       if(stores[i] == coordinates){
@@ -336,7 +336,7 @@ verbs.northeast = function(num) {
       combat()
     }
     for(var i=0;i<stores.length;i++){
-      if(stores[i] == coordinates){
+      if(stores[i][0] == coordinates[0] && stores[i][1] == coordinates[1]){
         landedOnStore()
       }
     }
@@ -369,30 +369,48 @@ verbs.stats = function(){
 }
 function combat(){
   var hasASword = false;
-  feedback('It is a generic Shadow Creature.')
-  for(var i=0;i<inventory.length;i++){
-    if(inventory[i] == 'sword'){
+  document.getElementById('info').innerHTML += 'It is a generic Shadow Creature.<br>';  
+  $.each(inventory,function(){
+    if(this == 'sword'){
       hasASword = true;
-      break;
     }
-  }
-  if(hasASword == false){
-    feedback('However, you do not have a sword, so you are forced to run away!')
+  });
+  if(!hasASword){
+    document.getElementById('info').innerHTML += 'However, you do not have a sword, so you are forced to run away!<br>';
     return;
   }
 }
-function feedback(message){
-  document.getElementById('info') += message + '<br>';
-}
 function landedOnStore(){
+  document.getElementById('info').innerHTML += 'Welcome to the store!<br>Here\'s what\'s available:<br>';
   var swordAvailable = true;
-  for(var i=0;i<inventory.length;i++){
-    if(inventory[i] == 'sword'){
+  $.each(inventory,function(){
+    if(this == 'sword'){
       swordAvailable = false;
-      break;
     }
+  });
+  if(swordAvailable){
+    document.getElementById('info').innerHTML += 'Sword: 25 gold<br>';
   }
-    if(swordAvailable){
-      document.getElementById('info').innerHTML += 'Sword: 25 gold<br>';
+  var shieldAvailable = true;
+  $.each(inventory,function(){
+    if(this == 'shield'){
+      shieldAvailable = false;
     }
+  });
+  if(shieldAvailable){
+    document.getElementById('info').innerHTML += 'Shield: 25 gold<br>';
   }
+  var pause = setTimeout(buy,1000);
+}
+function buy(){
+  var items = {
+    "sword":25,
+    "shield":25 
+  }
+  var item = prompt('What do you want to buy?');
+  item = item.toLowerCase();
+  gold -= items.item;
+  inventory.push(item);
+  document.getElementById('info').innerHTML += 'You bought a ' + item + '.<br>You have ' + gold + ' gold remaining.';
+  setTimeout(buy,1000);
+}
