@@ -1,77 +1,80 @@
-document.body.onkeyup = (function(e) {
+document.body.onkeyup = function(e) {
   if (e.keyCode == 32) {
-    $('#intro').remove();
+    $("#intro").remove();
     play();
   }
-})
+};
 var blink = setInterval(function() {
-  $('#space').toggle();
+  $("#space").toggle();
 }, 1000);
 var count = 0;
 var say = false;
-var name = '';
+var name = "";
 var coordinates = [];
 var health;
 var maxHealth;
 var gold;
 var maxGold;
 var inventory = [];
-var stores = [[50,50]];
-var inns = [[51,50]];
+var stores = [[50, 50],[21,14],[300,320],[91,80],[20,2]];
+var inns = [[51, 50],[60,40],[506,370],[2000,2000],[500,500]];
+var swordUpgrades;
+var swordName;
+var shieldName;
 function play() {
-  if (confirm('Load a game?')) {
-    var save = prompt('Enter your save string:');
-    while(save[0] != 'z'){
-       var namesub = save.slice(0, save.indexOf('x'));
-       var namesub2 = parseInt(namesub, 16);
-       name += String.fromCharCode(namesub2);
-       namesub2 = namesub2.toString();
-       save = save.slice(namesub.length + 1); 
+  if (confirm("Load a game?")) {
+    var save = prompt("Enter your save string:");
+    while (save[0] != "z") {
+      var namesub = save.slice(0, save.indexOf("x"));
+      var namesub2 = parseInt(namesub, 16);
+      name += String.fromCharCode(namesub2);
+      namesub2 = namesub2.toString();
+      save = save.slice(namesub.length + 1);
     }
     console.log(name);
     save = save.slice(1);
-    var substring = parseInt(save.slice(0, save.indexOf('z')),16);
+    var substring = parseInt(save.slice(0, save.indexOf("z")), 16);
     coordinates[0] = substring;
     substring = substring.toString();
     save = save.slice(substring.length);
-    substring = parseInt(save.slice(0, save.indexOf('z')),16);
+    substring = parseInt(save.slice(0, save.indexOf("z")), 16);
     coordinates[1] = substring;
     substring = substring.toString();
     save = save.slice(substring.length + 2);
     console.log(save);
-    substring = parseInt(save.slice(0, save.indexOf('z')),16);
+    substring = parseInt(save.slice(0, save.indexOf("z")), 16);
     health = substring;
     substring = substring.toString();
     save = save.slice(substring.length);
     console.log(save);
-    substring = parseInt(save.slice(0, save.indexOf('z')),16);
+    substring = parseInt(save.slice(0, save.indexOf("z")), 16);
     maxHealth = substring;
     substring = substring.toString();
     save = save.slice(substring.length);
     console.log(save);
-    substring = parseInt(save.slice(0, save.indexOf('z')),16);
+    substring = parseInt(save.slice(0, save.indexOf("z")), 16);
     gold = substring;
     substring = substring.toString();
     save = save.slice(substring.length);
-    substring = parseInt(save.slice(0, save.indexOf('z')),16);
+    substring = parseInt(save.slice(0, save.indexOf("z")), 16);
     maxGold = substring;
     substring = substring.toString();
     save = save.slice(substring.length);
   } else {
-    name = prompt('What is your name?');
+    name = prompt("What is your name?");
     coordinates = [0, 0];
-	  health = 15;
+    health = 15;
     maxHealth = 15;
     gold = 100;
     maxGold = 100;
   }
-  loop()
+  loop();
 }
 
 function loop() {
   do {
-    var command = prompt('Enter a command');
-    var command_words = command.split(' ');
+    var command = prompt("Enter a command");
+    var command_words = command.split(" ");
     var params = command_words.slice(1);
     if (verbs[command_words[0]]) {
       verbs[command_words[0]](params);
@@ -84,42 +87,51 @@ verbs.east = function(num) {
   count = 0;
   say = false;
   var num2 = parseInt(num);
-  for(var i=0;i<num2;i++){
+  for (var i = 0; i < num2; i++) {
     count++;
-    if(Math.random() * 99 <= 2){
+    if (Math.random() * 99 <= 2) {
       say = true;
       break;
     }
   }
-  if (coordinates[0] += count <= 2047) {
+  if ((coordinates[0] += count <= 2047)) {
     coordinates[0] += count;
     coordinates[0] -= 1;
-    document.getElementById('info').innerHTML += 'You moved ' + count + ((count > 1 || count <= 0) && count != -1 ? ' spaces east' : ' space east') + ' to ' + coordinates.toString() + '.<br>';
-    if(say){
-      document.getElementById('info').innerHTML += 'You encountered a Shadow Creature!<br>';
+    document.getElementById("info").innerHTML +=
+      "You moved " +
+      count +
+      ((count > 1 || count <= 0) && count != -1
+        ? " spaces east"
+        : " space east") +
+      " to " +
+      coordinates.toString() +
+      ".<br>";
+    if (say) {
+      document.getElementById("info").innerHTML +=
+        "You encountered a Shadow Creature!<br>";
     }
-    for(var i=0;i<stores.length;i++){
-      if(stores[i] == coordinates){
-        landedOnStore()
+    for (var i = 0; i < stores.length; i++) {
+      if (stores[i][0] == coordinates[0] && stores[i][1] == coordinates[1]) {
+        landedOnStore();
       }
     }
-    for(var i=0;i<inns.length;i++){
-      if(inns[i] == coordinates){
-        landedOnInn()
+    for (var i = 0; i < inns.length; i++) {
+      if (inns[i][0] == coordinates[0] && inns[i][1] == coordinates[1]) {
+        landedOnInn();
       }
     }
   } else {
-    document.getElementById('info').innerHTML += 'That\'s too far! <br>'
+    document.getElementById("info").innerHTML += "That's too far! <br>";
   }
-}
+};
 verbs.west = function(num) {
-  var num2 = parseInt(num)
+  var num2 = parseInt(num);
   count = 0;
   say = false;
   var num2 = parseInt(num);
-  for(var i=0;i<num2;i++){
+  for (var i = 0; i < num2; i++) {
     count++;
-    if(Math.random() * 99 <= 1){
+    if (Math.random() * 99 <= 1) {
       say = true;
       break;
     }
@@ -127,66 +139,84 @@ verbs.west = function(num) {
   if (coordinates[0] - count >= 0) {
     coordinates[0] -= count;
     coordinates[0] += 1;
-    document.getElementById('info').innerHTML += 'You moved ' + count + ((count > 1 || count <= 0) && count != -1 ? ' spaces west' : ' space west') + ' to ' + coordinates.toString() + '. <br>';
-    if(say){
-      document.getElementById('info').innerHTML += 'You encountered a Shadow Creature!<br>';
-      combat()
+    document.getElementById("info").innerHTML +=
+      "You moved " +
+      count +
+      ((count > 1 || count <= 0) && count != -1
+        ? " spaces west"
+        : " space west") +
+      " to " +
+      coordinates.toString() +
+      ". <br>";
+    if (say) {
+      document.getElementById("info").innerHTML +=
+        "You encountered a Shadow Creature!<br>";
+      combat();
     }
-    for(var i=0;i<stores.length;i++){
-      if(stores[i] == coordinates){
-        landedOnStore()
+    for (var i = 0; i < stores.length; i++) {
+      if (stores[i][0] == coordinates[0] && stores[i][1] == coordinates[1]) {
+        landedOnStore();
       }
     }
-    for(var i=0;i<inns.length;i++){
-      if(inns[i] == coordinates){
-        landedOnInn()
+    for (var i = 0; i < inns.length; i++) {
+      if (inns[i][0] == coordinates[0] && inns[i][1] == coordinates[1]) {
+        landedOnInn();
       }
     }
   } else {
-    document.getElementById('info').innerHTML += 'That\'s too far! <br>';
+    document.getElementById("info").innerHTML += "That's too far! <br>";
   }
-}
+};
 verbs.north = function(num) {
-  var num2 = parseInt(num)
+  var num2 = parseInt(num);
   count = 0;
   say = false;
   var num2 = parseInt(num);
-  for(var i=0;i<num2;i++){
+  for (var i = 0; i < num2; i++) {
     count++;
-    if(Math.random() * 99 <= 1){
+    if (Math.random() * 99 <= 1) {
       say = true;
       break;
     }
   }
   if (coordinates[1] + count <= 2047) {
     coordinates[1] += count;
-    document.getElementById('info').innerHTML += 'You moved ' + count + ((count > 1 || count <= 0) && count != -1 ? ' spaces north' : ' space north') + ' to ' + coordinates.toString() + '.<br>';
-    if(say){
-      document.getElementById('info').innerHTML += 'You encountered a Shadow Creature!<br>';
-      combat()
+    document.getElementById("info").innerHTML +=
+      "You moved " +
+      count +
+      ((count > 1 || count <= 0) && count != -1
+        ? " spaces north"
+        : " space north") +
+      " to " +
+      coordinates.toString() +
+      ".<br>";
+    if (say) {
+      document.getElementById("info").innerHTML +=
+        "You encountered a Shadow Creature!<br>";
+      combat();
     }
-    for(var i=0;i<stores.length;i++){
-      if(stores[i] == coordinates){
-        landedOnStore()
+    for (var i = 0; i < stores.length; i++) {
+      if (stores[i][0] == coordinates[0] && stores[i][1] == coordinates[1]) {
+        landedOnStore();
       }
     }
-    for(var i=0;i<inns.length;i++){
-      if(inns[i] == coordinates){
-        landedOnInn()
+    for (var i = 0; i < inns.length; i++) {
+      if (inns[i][0] == coordinates[0] && inns[i][1] == coordinates[1]) {
+        landedOnInn();
       }
     }
   } else {
-    document.getElementById('info').innerHTML += 'That\'s too far! <br>'
+    document.getElementById("info").innerHTML += "That's too far! <br>";
   }
-}
+};
 verbs.south = function(num) {
-  var num2 = parseInt(num)
+  var num2 = parseInt(num);
   count = 0;
   say = false;
   var num2 = parseInt(num);
-  for(var i=0;i<num2;i++){
+  for (var i = 0; i < num2; i++) {
     count++;
-    if(Math.random() * 99 <= 1){
+    if (Math.random() * 99 <= 1) {
       say = true;
       break;
     }
@@ -194,33 +224,42 @@ verbs.south = function(num) {
   if (coordinates[1] - count >= 0) {
     coordinates[1] -= count;
     coordinates[1] += 1;
-    document.getElementById('info').innerHTML += 'You moved ' + count + ((count > 1 || count <= 0) && count != -1 ? ' spaces south' : ' space south') + ' to ' + coordinates.toString() + '.<br>';
-    if(say){
-      document.getElementById('info').innerHTML += 'You encountered a Shadow Creature!<br>';
-      combat()
+    document.getElementById("info").innerHTML +=
+      "You moved " +
+      count +
+      ((count > 1 || count <= 0) && count != -1
+        ? " spaces south"
+        : " space south") +
+      " to " +
+      coordinates.toString() +
+      ".<br>";
+    if (say) {
+      document.getElementById("info").innerHTML +=
+        "You encountered a Shadow Creature!<br>";
+      combat();
     }
-    for(var i=0;i<stores.length;i++){
-      if(stores[i] == coordinates){
-        landedOnStore()
+    for (var i = 0; i < stores.length; i++) {
+      if (stores[i] == coordinates) {
+        landedOnStore();
       }
     }
-    for(var i=0;i<inns.length;i++){
-      if(inns[i] == coordinates){
-        landedOnInn()
+    for (var i = 0; i < inns.length; i++) {
+      if (inns[i] == coordinates) {
+        landedOnInn();
       }
     }
   } else {
-    document.getElementById('info').innerHTML += 'That\'s too far! <br>'
+    document.getElementById("info").innerHTML += "That's too far! <br>";
   }
-}
+};
 verbs.southeast = function(num) {
-  var num2 = parseInt(num)
+  var num2 = parseInt(num);
   count = 0;
   say = false;
   var num2 = parseInt(num);
-  for(var i=0;i<num2;i++){
+  for (var i = 0; i < num2; i++) {
     count++;
-    if(Math.random() * 99 <= 1){
+    if (Math.random() * 99 <= 1) {
       say = true;
       break;
     }
@@ -228,33 +267,42 @@ verbs.southeast = function(num) {
   if (coordinates[1] - count >= 0 && coordinates[0] + count <= 2047) {
     coordinates[1] -= count;
     coordinates[0] += count;
-    document.getElementById('info').innerHTML += 'You moved ' + count + ((count > 1 || count <= 0) && count != -1 ? ' spaces southeast' : ' space southeast') + ' to ' + coordinates.toString() + '.<br>';
-    if(say){
-      document.getElementById('info').innerHTML += 'You encountered a Shadow Creature!<br>';
-      combat()
+    document.getElementById("info").innerHTML +=
+      "You moved " +
+      count +
+      ((count > 1 || count <= 0) && count != -1
+        ? " spaces southeast"
+        : " space southeast") +
+      " to " +
+      coordinates.toString() +
+      ".<br>";
+    if (say) {
+      document.getElementById("info").innerHTML +=
+        "You encountered a Shadow Creature!<br>";
+      combat();
     }
-    for(var i=0;i<stores.length;i++){
-      if(stores[i] == coordinates){
-        landedOnStore()
+    for (var i = 0; i < stores.length; i++) {
+      if (stores[i][0] == coordinates[0] && stores[i][1] == coordinates[1]) {
+        landedOnStore();
       }
     }
-    for(var i=0;i<inns.length;i++){
-      if(inns[i] == coordinates){
-        landedOnInn()
+    for (var i = 0; i < inns.length; i++) {
+      if (inns[i][0] == coordinates[0] && inns[i][1] == coordinates[1]) {
+        landedOnInn();
       }
     }
   } else {
-    document.getElementById('info').innerHTML += 'That\'s too far! <br>'
+    document.getElementById("info").innerHTML += "That's too far! <br>";
   }
-}
+};
 verbs.southwest = function(num) {
-  var num2 = parseInt(num)
+  var num2 = parseInt(num);
   count = 0;
   say = false;
   var num2 = parseInt(num);
-  for(var i=0;i<num2;i++){
+  for (var i = 0; i < num2; i++) {
     count++;
-    if(Math.random() * 99 <= 1){
+    if (Math.random() * 99 <= 1) {
       say = true;
       break;
     }
@@ -262,33 +310,42 @@ verbs.southwest = function(num) {
   if (coordinates[1] - count >= 0 && coordinates[0] - count >= 0) {
     coordinates[1] -= count;
     coordinates[0] -= count;
-    document.getElementById('info').innerHTML += 'You moved ' + count + ((count > 1 || count <= 0) && count != -1 ? ' spaces southwest' : ' space southwest') + ' to ' + coordinates.toString() + '.<br>';
-    if(say){
-      document.getElementById('info').innerHTML += 'You encountered a Shadow Creature!<br>';
-      combat()
+    document.getElementById("info").innerHTML +=
+      "You moved " +
+      count +
+      ((count > 1 || count <= 0) && count != -1
+        ? " spaces southwest"
+        : " space southwest") +
+      " to " +
+      coordinates.toString() +
+      ".<br>";
+    if (say) {
+      document.getElementById("info").innerHTML +=
+        "You encountered a Shadow Creature!<br>";
+      combat();
     }
-    for(var i=0;i<stores.length;i++){
-      if(stores[i] == coordinates){
-        landedOnStore()
+    for (var i = 0; i < stores.length; i++) {
+      if (stores[i][0] == coordinates[0] && stores[i][1] == coordinates[1]) {
+        landedOnStore();
       }
     }
-    for(var i=0;i<inns.length;i++){
-      if(inns[i] == coordinates){
-        landedOnInn()
+    for (var i = 0; i < inns.length; i++) {
+      if (inns[i][0] == coordinates[0] && inns[i][1] == coordinates[1]) {
+        landedOnInn();
       }
     }
   } else {
-    document.getElementById('info').innerHTML += 'That\'s too far! <br>';
+    document.getElementById("info").innerHTML += "That's too far! <br>";
   }
-}
+};
 verbs.northwest = function(num) {
   var num2 = parseInt(num);
   count = 0;
   say = false;
   var num2 = parseInt(num);
-  for(var i=0;i<num2;i++){
+  for (var i = 0; i < num2; i++) {
     count++;
-    if(Math.random() * 99 <= 1){
+    if (Math.random() * 99 <= 1) {
       say = true;
       break;
     }
@@ -296,33 +353,42 @@ verbs.northwest = function(num) {
   if (coordinates[1] + num2 <= 2047 && coordinates[0] - num2 >= 0) {
     coordinates[1] += num2;
     coordinates[0] -= num2;
-    document.getElementById('info').innerHTML += 'You moved ' + num2 + ((num2 > 1 || num2 <= 0) && num2 != -1 ? ' spaces northwest' : ' space northwest') + ' to ' + coordinates.toString() + '.<br>';
-     if(say){
-      document.getElementById('info').innerHTML += 'You encountered a Shadow Creature!<br>';
+    document.getElementById("info").innerHTML +=
+      "You moved " +
+      num2 +
+      ((num2 > 1 || num2 <= 0) && num2 != -1
+        ? " spaces northwest"
+        : " space northwest") +
+      " to " +
+      coordinates.toString() +
+      ".<br>";
+    if (say) {
+      document.getElementById("info").innerHTML +=
+        "You encountered a Shadow Creature!<br>";
       combat();
     }
-    for(var i=0;i<stores.length;i++){
-      if(stores[i] == coordinates){
-        landedOnStore()
+    for (var i = 0; i < stores.length; i++) {
+      if (stores[i][0] == coordinates[0] && stores[i][1] == coordinates[1]) {
+        landedOnStore();
       }
     }
-    for(var i=0;i<inns.length;i++){
-      if(inns[i] == coordinates){
-        landedOnInn()
+    for (var i = 0; i < inns.length; i++) {
+      if (inns[i][0] == coordinates[0] && inns[i][1] == coordinates[1]) {
+        landedOnInn();
       }
     }
   } else {
-    document.getElementById('info').innerHTML += 'That\'s too far! <br>';
+    document.getElementById("info").innerHTML += "That's too far! <br>";
   }
-}
+};
 verbs.northeast = function(num) {
-  var num2 = parseInt(num)
+  var num2 = parseInt(num);
   count = 0;
   say = false;
   var num2 = parseInt(num);
-  for(var i=0;i<num2;i++){
+  for (var i = 0; i < num2; i++) {
     count++;
-    if(Math.random() * 99 <= 1){
+    if (Math.random() * 99 <= 1) {
       say = true;
       break;
     }
@@ -330,87 +396,129 @@ verbs.northeast = function(num) {
   if (coordinates[1] + count <= 2047 && coordinates[0] + count <= 2047) {
     coordinates[1] += count;
     coordinates[0] += count;
-    document.getElementById('info').innerHTML += 'You moved ' + count + ((count > 1 || count <= 0) && count != -1 ? ' spaces northeast' : ' space northeast') + ' to ' + coordinates.toString() + '.<br>';
-    if(say){
-      document.getElementById('info').innerHTML += 'You encountered a Shadow Creature!<br>';
-      combat()
+    document.getElementById("info").innerHTML +=
+      "You moved " +
+      count +
+      ((count > 1 || count <= 0) && count != -1
+        ? " spaces northeast"
+        : " space northeast") +
+      " to " +
+      coordinates.toString() +
+      ".<br>";
+    if (say) {
+      document.getElementById("info").innerHTML +=
+        "You encountered a Shadow Creature!<br>";
+      combat();
     }
-    for(var i=0;i<stores.length;i++){
-      if(stores[i][0] == coordinates[0] && stores[i][1] == coordinates[1]){
-        landedOnStore()
+    for (var i = 0; i < stores.length; i++) {
+      if (stores[i][0] == coordinates[0] && stores[i][1] == coordinates[1]) {
+        landedOnStore();
       }
     }
-    for(var i=0;i<inns.length;i++){
-      if(inns[i] == coordinates){
-        landedOnInn()
+    for (var i = 0; i < inns.length; i++) {
+      if (inns[i][0] == coordinates[0] && inns[i][1] == coordinates[1]) {
+        landedOnInn();
       }
     }
   } else {
-    document.getElementById('info').innerHTML += 'That\'s too far! <br>';
+    document.getElementById("info").innerHTML += "That's too far! <br>";
   }
-}
-verbs.save = function(){
+};
+verbs.save = function() {
   console.log(name);
-  var hex = '';
-  for(var i=0;i<name.length;i++){
-    hex += name.charCodeAt(i).toString(16) + 'x';
+  var hex = "";
+  for (var i = 0; i < name.length; i++) {
+    hex += name.charCodeAt(i).toString(16) + "x";
   }
-  hex += 'z'
-  hex += coordinates[0].toString(16) + 'z';
-  hex += coordinates[1].toString(16) + 'z';
-  hex += health.toString(16) + 'z';
-  hex += maxHealth.toString(16) + 'z';
-  hex += gold.toString(16) + 'z';
-  hex += maxGold.toString(16) + 'z';
-  prompt('Here is your save string. Copy it and paste it in a safe place.',hex);
-}
-verbs.stats = function(){
-  document.getElementById('info').innerHTML += 'Your coordinates are ' + coordinates.toString() + '.<br>You have ' + health + ' health remaining.<br>You have ' + gold + ' gold.<br>';
-}
-function combat(){
+  hex += "z";
+  hex += coordinates[0].toString(16) + "z";
+  hex += coordinates[1].toString(16) + "z";
+  hex += health.toString(16) + "z";
+  hex += maxHealth.toString(16) + "z";
+  hex += gold.toString(16) + "z";
+  hex += maxGold.toString(16) + "z";
+  prompt(
+    "Here is your save string. Copy it and paste it in a safe place.",
+    hex
+  );
+};
+verbs.stats = function() {
+  document.getElementById("info").innerHTML +=
+    "Your coordinates are " +
+    coordinates.toString() +
+    ".<br>You have " +
+    health +
+    " health remaining.<br>You have " +
+    gold +
+    " gold.<br>";
+};
+function combat() {
   var hasASword = false;
-  document.getElementById('info').innerHTML += 'It is a generic Shadow Creature.<br>';  
-  $.each(inventory,function(){
-    if(this == 'sword'){
+  document.getElementById("info").innerHTML +=
+    "It is a generic Shadow Creature.<br>";
+  $.each(inventory, function() {
+    if (this == "sword") {
       hasASword = true;
     }
   });
-  if(!hasASword){
-    document.getElementById('info').innerHTML += 'However, you do not have a sword, so you are forced to run away!<br>';
+  if (!hasASword) {
+    document.getElementById("info").innerHTML +=
+      "However, you do not have a sword, so you are forced to run away!<br>";
     return;
   }
 }
-function landedOnStore(){
-  document.getElementById('info').innerHTML += 'Welcome to the store!<br>Here\'s what\'s available:<br>';
+function landedOnStore() {
+  document.getElementById("info").innerHTML +=
+    "Welcome to the store!<br>Here's what's available:<br>";
   var swordAvailable = true;
-  $.each(inventory,function(){
-    if(this == 'sword'){
+  $.each(inventory, function() {
+    if (this == "great sword") {
       swordAvailable = false;
     }
   });
-  if(swordAvailable){
-    document.getElementById('info').innerHTML += 'Sword: 25 gold<br>';
+  if (swordAvailable) {
+    document.getElementById("info").innerHTML += "Great Sword: 25 gold<br>";
   }
   var shieldAvailable = true;
-  $.each(inventory,function(){
-    if(this == 'shield'){
+  $.each(inventory, function() {
+    if (this == "traveler's shield") {
       shieldAvailable = false;
     }
   });
-  if(shieldAvailable){
-    document.getElementById('info').innerHTML += 'Shield: 25 gold<br>';
+  if (shieldAvailable) {
+    document.getElementById("info").innerHTML += "Traveler's Shield: 25 gold<br>";
   }
-  var pause = setTimeout(buy,1000);
+  var pause = setTimeout(buy, 1000);
 }
-function buy(){
-  var items = {
-    "sword":25,
-    "shield":25 
-  }
-  var item = prompt('What do you want to buy?');
+function buy() {
+  var items = ["sword", "shield"];
+  var prices = [25, 25];
+  var item = prompt("What do you want to buy?");
   item = item.toLowerCase();
-  gold -= items.item;
-  inventory.push(item);
-  document.getElementById('info').innerHTML += 'You bought a ' + item + '.<br>You have ' + gold + ' gold remaining.';
-  setTimeout(buy,1000);
+  for (var i = 0; i < items.length; i++) {
+    if (items[i] == item) {
+      if (gold - prices[i] >= 0) {
+        gold -= prices[i];
+        switch(item){
+          case 'great sword':
+            inventory.push('sword')
+            swordName = 'great sword';
+        }
+        document.getElementById("info").innerHTML +=
+          "You bought a " +
+          item +
+          "!<br>You have " +
+          gold +
+          " gold remaining.<br>";
+      } else {
+        document.getElementById("info").innerHTML +=
+          "You don't have enough gold.<br>";
+      }
+    }
+  }
+  var pause = setTimeout(buy, 1000);
+}
+function landedOnInn(){
+  document.getElementById('info').innerHTML += "You stayed at an inn. Your health has been restored."
+  health = maxHealth;
 }
