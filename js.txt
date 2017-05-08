@@ -7,6 +7,8 @@ document.body.onkeyup = function(e) {
 var blink = setInterval(function() {
   $("#space").toggle();
 }, 1000);
+var verbs;
+var enemyHealth;
 var count = 0;
 var say = false;
 var name = "";
@@ -16,11 +18,25 @@ var maxHealth;
 var gold;
 var maxGold;
 var inventory = [];
-var stores = [[50, 50],[21,14],[300,320],[91,80],[20,2]];
-var inns = [[51, 50],[60,40],[506,370],[2000,2000],[500,500]];
+var stores = [[50, 50], [21, 14], [300, 320], [91, 80], [20, 2]];
+var inns = [[51, 50], [60, 40], [506, 370], [2000, 2000], [500, 500]];
 var swordUpgrades;
 var swordName;
 var shieldName;
+var swords = {
+  "great sword": {
+    power: 8,
+    level:1,
+    maxLevel: 16
+  }
+};
+var shields = {
+  "traveler's sword": {
+    defense: 8,
+    level:1,
+    maxLevel: 16
+  }
+};
 function play() {
   if (confirm("Load a game?")) {
     var save = prompt("Enter your save string:");
@@ -63,8 +79,8 @@ function play() {
   } else {
     name = prompt("What is your name?");
     coordinates = [0, 0];
-    health = 15;
-    maxHealth = 15;
+    health = 30;
+    maxHealth = 30;
     gold = 100;
     maxGold = 100;
   }
@@ -82,7 +98,7 @@ function loop() {
   } while (!verbs[command_words[0]]);
   var whatever = setTimeout(loop, 1000);
 }
-var verbs = {};
+verbs = {};
 verbs.east = function(num) {
   count = 0;
   say = false;
@@ -453,9 +469,18 @@ verbs.stats = function() {
     " gold.<br>";
 };
 function combat() {
+  var turn = 1;
   var hasASword = false;
+  var enemies = {
+    generic: {
+      health: 20,
+      attack: 3,
+      defense: 1
+    }
+  };
   document.getElementById("info").innerHTML +=
     "It is a generic Shadow Creature.<br>";
+  var enemy = "generic";
   $.each(inventory, function() {
     if (this == "sword") {
       hasASword = true;
@@ -465,6 +490,54 @@ function combat() {
     document.getElementById("info").innerHTML +=
       "However, you do not have a sword, so you are forced to run away!<br>";
     return;
+  } else {
+    var enemyMaxHealth = enemies.enemy.health;
+    enemyHealth = enemyMaxHealth;
+    var enemyDefense = enemies.enemy.defense;
+    verbs = {};
+    verbs.attack = function(){
+      enemyHealth = enemyHealth - (swords.swordName.power - enemyDefense);
+      var damage = swords.swordName.power - enemyDefense;
+      if(Math.random()*99 < 4.6875 * swords.swordName.level){
+        document.getElementById('info').innerHTML += 'Critical hit!<br>'
+      }
+      document.getElementById('info').innerHTML += 'The enemy took ' + damage + ' damage.<br>';
+      if(enemyMaxHealth = 0){
+        document.getElementById('info').innerHTML += 'You won!<br>';
+      }
+      if(health = 0){
+        document.getElementById('info').innerHTML += 'Game Over!<br>';
+        setTimeout(delete,9001);
+      }
+    };
+    if(turn){
+      do {
+        var command = prompt("Enter a command");
+        var command_words = command.split(" ");
+        var params = command_words.slice(1);
+        if (verbs[command_words[0]]) {
+          verbs[command_words[0]](params);
+        }
+      } while (!verbs[command_words[0]]);
+    var whatever = setTimeout(combat, 1000);  
+    } else {
+      var hasAShield = false;
+      $.each(inventory,function(){
+        if(this == 'shield'){
+          hasAShield = true;
+        }
+      });
+      var damage;
+      if(hasAShield){
+        health -= (enemies.enemy.attack - shields.shield.defense);
+        damage = (enemies.enemy.attack - shields.shield.defense);
+      } else {
+        health -= enemies.enemy.attack;
+        damage = enemies.enemy.attack;
+      }
+      document.getElementById('info').innerHTML += 'You took ' + damage + ' damage.<br>You have ' + health + ' health remaining.';
+    }
+    turn = !turn;
   }
 }
 function landedOnStore() {
@@ -486,7 +559,8 @@ function landedOnStore() {
     }
   });
   if (shieldAvailable) {
-    document.getElementById("info").innerHTML += "Traveler's Shield: 25 gold<br>";
+    document.getElementById("info").innerHTML +=
+      "Traveler's Shield: 25 gold<br>";
   }
   var pause = setTimeout(buy, 1000);
 }
@@ -499,10 +573,13 @@ function buy() {
     if (items[i] == item) {
       if (gold - prices[i] >= 0) {
         gold -= prices[i];
-        switch(item){
-          case 'great sword':
-            inventory.push('sword')
-            swordName = 'great sword';
+        switch (item) {
+          case "great sword":
+            inventory.push("sword");
+            swordName = "great sword";
+          case "traveler's shield":
+            inventory.push("shield");
+            shieldName = "traveler's shield";
         }
         document.getElementById("info").innerHTML +=
           "You bought a " +
@@ -518,7 +595,8 @@ function buy() {
   }
   var pause = setTimeout(buy, 1000);
 }
-function landedOnInn(){
-  document.getElementById('info').innerHTML += "You stayed at an inn. Your health has been restored."
+function landedOnInn() {
+  document.getElementById("info").innerHTML +=
+    "You stayed at an inn. Your health has been restored.";
   health = maxHealth;
 }
