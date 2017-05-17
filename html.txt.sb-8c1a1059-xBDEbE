@@ -8,9 +8,7 @@
 
 </head>
 
-<body style='font-family: "Courier New";
-  background-color: #000;
-  color: #0f0;'>
+<body>
   <div id='intro'>
     <pre>
 oooooooooooo               .                             .o88o.          .   oooo                       ooooo      ooo  o8o                             oooooooooo.                                                                
@@ -29,27 +27,6 @@ o888o        `Y888""8o   "888" `Y8bod8P'      `Y8bod8P' o888o          "888" o88
     <p id='space'>Press SPACE</p>
   </div>
   <p id='info'></p>
-  <div id='forms'>
-    <div id ='general'>
-      <form onSubmit='runCommand();return false'>
-        <input type='text' id='main'></input>
-      </form>
-    </div>
-    <div id='store'>
-      <form>
-        <button type='button' id='sword' onclick="verbs.buy('traveler\'s sword')">Traveler's Sword</button>
-        <br>
-        <button type='button' id='shield' onclick="verbs.buy('traveler\'s shield')">Traveler's Shield</button>
-        <br>
-        <button type='button' id='loc1' onclick='verbs.buy("loc1")'>Location of the Fire Portal</button>
-        <br>
-        <button type='button' id='leave' onclick='$("#forms").attr("class","general");'>Leave</button>
-      </form>
-    </div>
-    <div id='combat'>
-      <button type='button' onclick='verbs.attack();return false'>Attack</button>
-    </div>
-  </div>
 </body>
 
 </html>
