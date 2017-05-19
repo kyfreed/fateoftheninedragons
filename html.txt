@@ -3,53 +3,94 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width">
-  <title>JS Bin</title>
+  <title>Fate of the Nine Dragons</title>
   <script src="https://code.jquery.com/jquery-2.1.4.js"></script>
 
 </head>
 
 <body style='font-family: "Courier New";
   background-color: #000;
-  color: #0f0;'>
+  color: #0f0;font-size:24px'>
   <div id='intro'>
-    <pre>
-oooooooooooo               .                             .o88o.          .   oooo                       ooooo      ooo  o8o                             oooooooooo.                                                                
-`888'     `8             .o8                             888 `"        .o8   `888                       `888b.     `8'  `"'                             `888'   `Y8b                                                               
- 888          .oooo.   .o888oo  .ooooo.        .ooooo.  o888oo       .o888oo  888 .oo.    .ooooo.        8 `88b.    8  oooo  ooo. .oo.    .ooooo.        888      888 oooo d8b  .oooo.    .oooooooo  .ooooo.  ooo. .oo.    .oooo.o 
- 888oooo8    `P  )88b    888   d88' `88b      d88' `88b  888           888    888P"Y88b  d88' `88b       8   `88b.  8  `888  `888P"Y88b  d88' `88b       888      888 `888""8P `P  )88b  888' `88b  d88' `88b `888P"Y88b  d88(  "8 
- 888    "     .oP"888    888   888ooo888      888   888  888           888    888   888  888ooo888       8     `88b.8   888   888   888  888ooo888       888      888  888      .oP"888  888   888  888   888  888   888  `"Y88b.  
- 888         d8(  888    888 . 888    .o      888   888  888           888 .  888   888  888    .o       8       `888   888   888   888  888    .o       888     d88'  888     d8(  888  `88bod8P'  888   888  888   888  o.  )88b 
-o888o        `Y888""8o   "888" `Y8bod8P'      `Y8bod8P' o888o          "888" o888o o888o `Y8bod8P'      o8o        `8  o888o o888o o888o `Y8bod8P'      o888bood8P'   d888b    `Y888""8o `8oooooo.  `Y8bod8P' o888o o888o 8""888P' 
-                                                                                                                                                                                         d"     YD                                 
-                                                                                                                                                                                         "Y88888P'                                 
-                                                                                                                                                                                                                                     
+<pre>oooooooooooo               .                             .o88o.          .   oooo                  
+`888'     `8             .o8                             888 `"        .o8   `888                  
+ 888          .oooo.   .o888oo  .ooooo.        .ooooo.  o888oo       .o888oo  888 .oo.    .ooooo.  
+ 888oooo8    `P  )88b    888   d88' `88b      d88' `88b  888           888    888P"Y88b  d88' `88b 
+ 888    "     .oP"888    888   888ooo888      888   888  888           888    888   888  888ooo888 
+ 888         d8(  888    888 . 888    .o      888   888  888           888 .  888   888  888    .o 
+o888o        `Y888""8o   "888" `Y8bod8P'      `Y8bod8P' o888o          "888" o888o o888o `Y8bod8P'
+
+ooooo      ooo  o8o                             oooooooooo.                                                                
+`888b.     `8'  `"'                             `888'   `Y8b                                                               
+ 8 `88b.    8  oooo  ooo. .oo.    .ooooo.        888      888 oooo d8b  .oooo.    .oooooooo  .ooooo.  ooo. .oo.    .oooo.o 
+ 8   `88b.  8  `888  `888P"Y88b  d88' `88b       888      888 `888""8P `P  )88b  888' `88b  d88' `88b `888P"Y88b  d88(  "8 
+ 8     `88b.8   888   888   888  888ooo888       888      888  888      .oP"888  888   888  888   888  888   888  `"Y88b.  
+ 8       `888   888   888   888  888    .o       888     d88'  888     d8(  888  `88bod8P'  888   888  888   888  o.  )88b 
+o8o        `8  o888o o888o o888o `Y8bod8P'      o888bood8P'   d888b    `Y888""8o `8oooooo.  `Y8bod8P' o888o o888o 8""888P' 
+                                                                                 d"     YD                                 
+                                                                                 "Y88888P'                                                                                                                                                                                                                                                                                                                                                                      
   </pre>
     <br>
     <br>
-    <p id='space'>Press SPACE</p>
+    <button type='button' onclick='$("#intro").remove();
+    play();'>New Game</button>
+    <button type='button' onclick='$("#intro").remove();
+    play(true);'>Load Game</button>
   </div>
   <p id='info'></p>
+  <pre id='over'>                   *              )               (     
+ (        (      (  `          ( /(               )\ )  
+ )\ )     )\     )\))(   (     )\()) (   (   (   (()/(  
+(()/(  ((((_)(  ((_)()\  )\   ((_)\  )\  )\  )\   /(_)) 
+ /(_))_ )\ _ )\ (_()((_)((_)    ((_)((_)((_)((_) (_))   
+(_)) __|(_)_\(_)|  \/  || __|  / _ \\ \ / / | __|| _ \  
+  | (_ | / _ \  | |\/| || _|  | (_) |\ V /  | _| |   /  
+   \___|/_/ \_\ |_|  |_||___|  \___/  \_/   |___||_|_\  
+                                                       
+  </pre>
   <div id='forms'>
     <div id ='general'>
       <form onSubmit='runCommand();return false'>
         <input type='text' id='main'></input>
       </form>
+    <br>
+    <button onclick='verbs.map();return false;'>Map</button>
+    <br>
+    <button onclick='verbs.stats();return false;'>Stats</button>
+    <br>
+    <button onclick='verbs.inventory();return false;'>Inventory</button>
     </div>
     <div id='store'>
       <form>
-        <button type='button' id='sword' onclick="verbs.buy('traveler\'s sword')">Traveler's Sword</button>
+        <button type='button' id='shield' onclick="verbs.buy('traveler\'s shield')">Traveler's Shield: 50</button>
         <br>
-        <button type='button' id='shield' onclick="verbs.buy('traveler\'s shield')">Traveler's Shield</button>
+        <button type='button' id='loc1' onclick='verbs.buy("loc1")'>Location of the Fire Portal: 100</button>
         <br>
-        <button type='button' id='loc1' onclick='verbs.buy("loc1")'>Location of the Fire Portal</button>
+        <button type='button' id='potion' onclick='verbs.buy("potion")'>Healing Potion: 16</button>
         <br>
         <button type='button' id='leave' onclick='$("#forms").attr("class","general");'>Leave</button>
       </form>
     </div>
     <div id='combat'>
       <button type='button' onclick='verbs.attack();return false'>Attack</button>
+      <br>
+      <select id='items'>  
+      </select>
+      <br>
+      <button type='button' onclick='verbs.use();return false;'>Use Item</button>
+      <br>
+      <button type='button' onclick='verbs.run();return false;'>Run Away</button>
+    </div>
+    <div id='navi'>
+      <button type='button' onclick='verbs.die();return false;'>Yes</button>
+      <br>
+      <button type='button' onclick='$("#forms").attr("class","general");'>No</button>
+    </div>
+    <div id='leave'>
+      <button type='button' onclick='verbs.leave();return false;'>Yes</button>
+      <br>
+      <button type='button' onclick='$("#forms").attr("class","general");'>No</button>
     </div>
   </div>
 </body>
-
 </html>

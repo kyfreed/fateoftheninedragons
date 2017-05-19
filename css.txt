@@ -12,6 +12,10 @@ button{
   position:fixed;
   top:38%;
   right:10px;
+  font-size:24px;
+}
+#forms input, button, select{
+  font-size:24px;
 }
 #forms div{
   display:none;
@@ -19,7 +23,7 @@ button{
 #forms.general #general{
   display:block;
 }
-#general{
+#main{
   border-style:solid;
   border-width:2px;
   border-color:#0f0;
@@ -29,4 +33,15 @@ button{
 }
 #forms.combat #combat{
   display:block;
+}
+#forms.navi #navi {
+  display:block;
+}
+#forms.leave #leave {
+  display:block;
+}
+select{
+  background-color:#000;
+  color:#0f0;
+  font-family:"Courier New";
 }
