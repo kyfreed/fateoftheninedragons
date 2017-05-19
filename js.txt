@@ -39,7 +39,7 @@ var health;
 var maxHealth;
 var gold;
 var maxGold;
-var inventory = ['loc1'];
+var inventory = ['sword'];
 var stores = [[50, 50], [21, 14], [300, 320], [91, 80], [20, 2]];
 var inns = [[51, 50], [60, 40], [506, 370], [2000, 2000], [500, 500]];
 var loc1 = [Math.floor(Math.random()*255),Math.floor(Math.random()*255)];
