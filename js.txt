@@ -1,5 +1,5 @@
 $("#over").hide();
-var realmArray = ["", "fire"];
+var realmArray = ["", "fire",'water'];
 var realm = "overworld";
 var realms = {
   overworld: {
@@ -9,9 +9,17 @@ var realms = {
   fire: {
     maxUp: 63,
     maxRight: 63
+  },
+  water: {
+    maxUp: 99,
+    maxRight: 99
   }
 };
+var xp;
+var criteria = ['','',32,50,100,150,200,256,300,350];
+var myLevel;
 var dragonName;
+var attackBoosted;
 var itemsIndex;
 var itemsArray;
 var invstring;
@@ -19,15 +27,27 @@ var enemies = {
   generic: {
     health: 64,
     attack: 16,
-    defense: 1
+    defense: 1,
+    winnings: 16,
+    xp:8
   },
   fire: {
     health: 128,
     attack: 64,
-    defense: 0
+    defense: 0,
+    xp:128
+  },
+  water: {
+    health: 150,
+    attack: 75,
+    defense: 4,
+    xp:256
   }
 };
 var turn;
+var myTurnCounter;
+var hisTurnCounter;
+var effects = {};
 var enemy;
 var verbs;
 var enemyHealth;
@@ -39,10 +59,11 @@ var health;
 var maxHealth;
 var gold;
 var maxGold;
-var inventory = ['sword'];
+var inventory = [];
 var stores = [[50, 50], [21, 14], [300, 320], [91, 80], [20, 2]];
 var inns = [[51, 50], [60, 40], [506, 370], [2000, 2000], [500, 500]];
 var loc1 = [Math.floor(Math.random()*255),Math.floor(Math.random()*255)];
+var loc2 = [Math.floor(Math.random()*324),Math.floor(Math.random()*324)];
 var swordUpgrades;
 var swordName = "traveler's sword";
 var shieldName;
@@ -50,7 +71,8 @@ var swords = {
   "traveler's sword": {
     power: 16,
     level: 1,
-    maxLevel: 16
+    maxLevel: 16,
+    element:null
   }
 };
 var shields = {
@@ -71,28 +93,23 @@ function play(load) {
       namesub2 = namesub2.toString();
       save = save.slice(namesub.length + 1);
     }
-    console.log(name);
     save = save.slice(1);
     var substring = parseInt(save.slice(0, save.indexOf("z")), 16);
     coordinates[0] = substring;
     substring = substring.toString();
     save = save.slice(substring.length + 1);
-    console.log(save);
     substring = parseInt(save.slice(0, save.indexOf("z")), 16);
     coordinates[1] = substring;
     substring = substring.toString();
     save = save.slice(substring.length + 1);
-    console.log(save);
     substring = parseInt(save.slice(0, save.indexOf("z")), 16);
     health = substring;
     substring = substring.toString();
     save = save.slice(substring.length + 1);
-    console.log(save);
     substring = parseInt(save.slice(0, save.indexOf("z")), 16);
     maxHealth = substring;
     substring = substring.toString();
     save = save.slice(substring.length + 1);
-    console.log(save);
     substring = parseInt(save.slice(0, save.indexOf("z")), 16);
     gold = substring;
     substring = substring.toString();
@@ -100,7 +117,7 @@ function play(load) {
     substring = parseInt(save.slice(0, save.indexOf("z")), 16);
     maxGold = substring;
     substring = substring.toString();
-    save = save.slice(substring.length + 1);
+    save = save.slice(substring.length);
     while (save[0] != "z") {
       while (save[0] != "y") {
         var invsub = save.slice(0, save.indexOf("x"));
@@ -108,20 +125,23 @@ function play(load) {
         invstring += String.fromCharCode(invsub2);
         invsub2 = invsub2.toString();
         save = save.slice(invsub.length + 1);
-        console.log(save);
       }
       inventory.push(invstring);
-      console.log(inventory);
       invstring = "";
       save = save.slice(1);
     }
+    inventory[0] = inventory[0].slice(9);
   } else {
     name = prompt("What is your name?");
+    inventory = ['sword']
     coordinates = [0, 0];
     health = 256;
     maxHealth = 256;
     gold = 100;
     maxGold = 100;
+    xp = 0;
+    myLevel = 1;
+    
   }
 }
 
@@ -137,9 +157,12 @@ function runCommand() {
   if (coordinates[0] == loc1[0] && coordinates[1] == loc1[1]) {
     verbs.switchLoc("fire");
   }
+  if (coordinates[0] == loc2[0] && coordinates[1] == loc2[1]) {
+    verbs.switchLoc("water");
+  }
   if (coordinates[0] == 0 && coordinates[1] == 0 && realm != "overworld") {
     document.getElementById("info").innerHTML +=
-      "Do you want to leave this realm?<br>";
+      "Do you want to leave the realm of " + realm + "?<br>";
     $("#forms").attr("class", "leave");
   }
   if (
@@ -162,6 +185,11 @@ function runCommand() {
           landedOnInn();
         }
       }  
+  }
+   if (say) {
+      document.getElementById("info").innerHTML +=
+        "You encountered an enemy!<br>";
+      combat("generic");
     }
 }
 verbs = {};
@@ -188,11 +216,6 @@ verbs.east = function(num) {
       " to " +
       coordinates.toString() +
       ".<br>";
-    if (say) {
-      document.getElementById("info").innerHTML +=
-        "You encountered an enemy!<br>";
-      combat("generic");
-    }
   } else {
     document.getElementById("info").innerHTML += "That's too far! <br>";
   }
@@ -220,11 +243,6 @@ verbs.west = function(num) {
       " to " +
       coordinates.toString() +
       ". <br>";
-    if (say) {
-      document.getElementById("info").innerHTML +=
-        "You encountered an enemy!<br>";
-      combat("generic");
-    }
   } else {
     document.getElementById("info").innerHTML += "That's too far! <br>";
   }
@@ -252,11 +270,6 @@ verbs.north = function(num) {
       " to " +
       coordinates.toString() +
       ".<br>";
-    if (say) {
-      document.getElementById("info").innerHTML +=
-        "You encountered an enemy!<br>";
-      combat("generic");
-    }
   } else {
     document.getElementById("info").innerHTML += "That's too far! <br>";
   }
@@ -284,11 +297,6 @@ verbs.south = function(num) {
       " to " +
       coordinates.toString() +
       ".<br>";
-    if (say) {
-      document.getElementById("info").innerHTML +=
-        "You encountered an enemy!<br>";
-      combat("generic");
-    }
   } else {
     document.getElementById("info").innerHTML += "That's too far! <br>";
   }
@@ -320,11 +328,6 @@ verbs.southeast = function(num) {
       " to " +
       coordinates.toString() +
       ".<br>";
-    if (say) {
-      document.getElementById("info").innerHTML +=
-        "You encountered an enemy!<br>";
-      combat("generic");
-    }
   } else {
     document.getElementById("info").innerHTML += "That's too far! <br>";
   }
@@ -353,11 +356,6 @@ verbs.southwest = function(num) {
       " to " +
       coordinates.toString() +
       ".<br>";
-    if (say) {
-      document.getElementById("info").innerHTML +=
-        "You encountered an enemy!<br>";
-      combat("generic");
-    }
   } else {
     document.getElementById("info").innerHTML += "That's too far! <br>";
   }
@@ -389,11 +387,6 @@ verbs.northwest = function(num) {
       " to " +
       coordinates.toString() +
       ".<br>";
-    if (say) {
-      document.getElementById("info").innerHTML +=
-        "You encountered an enemy!<br>";
-      combat("generic");
-    }
   } else {
     document.getElementById("info").innerHTML += "That's too far! <br>";
   }
@@ -425,11 +418,6 @@ verbs.northeast = function(num) {
       " to " +
       coordinates.toString() +
       ".<br>";
-    if (say) {
-      document.getElementById("info").innerHTML +=
-        "You encountered an enemy!<br>";
-      combat("generic");
-    }
   } else {
     document.getElementById("info").innerHTML += "That's too far! <br>";
   }
@@ -454,6 +442,7 @@ verbs.save = function() {
     hex += "y";
   });
   hex += "z";
+  hex += xp.toString(16) + 'z';
   prompt(
     "Here is your save string. Copy it and paste it in a safe place.",
     hex
@@ -513,15 +502,48 @@ verbs.buy = function(par) {
         } else {
           document.getElementById("info").innerHTML += "That's too much!<br>";
         }
+        break;
+      case "attack boost":
+        if (gold - 32 >= 0) {
+          inventory.push("attack boost");
+          gold -= 32;
+          document.getElementById("info").innerHTML +=
+            "You bought an attack boost!<br>You have " +
+            gold +
+            " gold remaining.<br>";
+        } else {
+          document.getElementById("info").innerHTML += "That's too much!<br>";
+        }
+        break;
+      case "loc2":
+       if (gold - 150 >= 0) {
+         inventory.push("loc2");
+         gold -= 150;
+         document.getElementById("info").innerHTML +=
+           "You bought the location of the Water Portal!<br>You have " +
+           gold +
+           " gold remaining.<br>";
+       } else {
+         document.getElementById("info").innerHTML += "That's too much!<br>";
+       }
+        break;
+        
     }
     $("html, body").animate({ scrollTop: $(document).height() }, 1000);
   }
 };
 verbs.attack = function() {
+  var keys = Object.keys(enemies);
+  var realmIn = false;
+  $.each(keys,function(){
+    if(this == realm){
+      realmIn = true;
+    }
+  });
   var enemyDefense = enemies[enemy].defense;
   var rndm = Math.round(Math.random() * 8 + 1) - 4;
   console.log(rndm);
-  var damage = swords[swordName].power - enemyDefense + rndm;
+  var damage = swords[swordName].power - enemyDefense + rndm + 8 * (myLevel - 1);
   enemyHealth = enemyHealth - damage;
   console.log(enemyHealth);
   if (Math.random() * 99 < 4.6875 * swords[swordName].level) {
@@ -531,27 +553,39 @@ verbs.attack = function() {
   document.getElementById("info").innerHTML +=
     "The enemy took " + damage + " damage.<br>";
   if (enemyHealth <= 0) {
-    var rndm = Math.round(Math.random() * 16 + 1 - 8);
-    var winnings = 16 + rndm;
-    if (gold + winnings <= maxGold) {
-      gold += winnings;
-    } else {
+    document.getElementById('info').innerHTML += 'You won!<br>';
+    if(realmIn){
+      maxGold += 50;
       gold = maxGold;
+      verbs.leave();
+    } else {
+      var rndm = Math.round(Math.random() * 16 + 1 - 8);
+      var winnings = 16 + rndm;
+      if (gold + winnings <= maxGold) {
+        gold += winnings;
+      } else {
+        gold = maxGold;
+      }
+      document.getElementById("info").innerHTML +=
+      "You won " + winnings + " gold!<br>";
     }
-    document.getElementById("info").innerHTML +=
-      "You won!<br>You won " + winnings + " gold!<br>";
+      xp += enemies[enemy].xp;
+      document.getElementById('info').innerHTML += 'You gained ' + enemies[enemy].xp + 'XP!<br>';
+      verbs.levelCheck();
     $("html, body").animate({ scrollTop: $(document).height() }, 1000);
     $("#forms").attr("class", "general");
+      effects = {};
     return false;
   }
+  myTurnCounter++;
+  verbs.effectCheck();
   var hasAShield = false;
   $.each(inventory, function() {
     if (this == "shield") {
       hasAShield = true;
     }
   });
-  var damage;
-  var rndm = Math.round(Math.random() * 8 + 1) - 4;
+  rndm = Math.round(Math.random() * 8 + 1) - 4;
   if (hasAShield) {
     health -= enemies[enemy].attack - shields[shieldName].defense + rndm;
     damage = enemies[enemy].attack - shields[shieldName].defense + rndm;
@@ -584,7 +618,7 @@ verbs.attack = function() {
     document.body.style.color = "#0f0";
     $("button").css("background-color", "#0f0");
     $("input").css("color", "#0f0");
-    $('select').css('color','#0f0')  
+    $('select').css('color','#0f0');  
   }
   if (health <= 0) {
     $("#over").show();
@@ -594,13 +628,18 @@ verbs.attack = function() {
     return false;
   }
   $("html, body").animate({ scrollTop: $(document).height() }, 1000);
+  hisTurnCounter++;
+  verbs.effectCheck();
 };
 verbs.location = function(num) {
-  var concat = "loc" + num;
-  if (inventory.indexOf(concat)) {
-    document.getElementById("info").innerHTML +=
+  concat = 'loc' + num.toString();
+  var locAvailable = false;
+  $.each(inventory,function(){
+    if(this == 'loc'+num.toString()){
+      document.getElementById("info").innerHTML +=
       "That location is at " + eval(concat).toString() + ".<br>";
-  }
+    };
+});
 };
 verbs.map = function() {
   var s = "";
@@ -628,9 +667,10 @@ verbs.die = function() {
   document.body.innerHTML = "<h1>Error 9001</h1>You made a fatal mistake.";
 };
 verbs.use = function() {
-  var item = $("#items").val();
-  switch (item) {
-    case "Potion":
+  var k;
+  var i = document.getElementById("items");
+  var item = i.options[i.selectedIndex].text;
+  if(item.includes('Potion')) {
       if (health + 64 <= maxHealth) {
         health += 64;
       } else {
@@ -639,9 +679,48 @@ verbs.use = function() {
       document.getElementById("info").innerHTML +=
         "You used a potion.<br>You regained 64 health.<br>";
       inventory.splice(inventory.indexOf('potion'),1);
+      document.getElementById("items").remove(i.options[i.selectedIndex]);
+        for(var j=0;j<item.length;j++){
+          if(!isNaN(item[j]) && item[j] != ' '){
+            k = j;
+            break;
+          }
+        }
+        console.log(k);
+        console.log(item[k]);
+        item = item.slice(k);
+        item = parseInt(item);
+        --item;
+        if(item > 0){
+          $('#items').append("<option class='potion'>Potion x" + item + "</option");
+        }
   }
-  var i = document.getElementById("items").selectedIndex;
-  document.getElementById("items").remove(i);
+    if(item.includes('Attack Boost')){
+      if(!attackBoosted){
+        swords[swordName].power *= 2;
+        effects.attack = hisTurnCounter + 3;
+        attackBoosted = true;
+        document.getElementById('info').innerHTML += 'You used an attack boost! Your attack was doubled!<br>';
+        inventory.splice(inventory.indexOf('attack boost'),1);
+        document.getElementById("items").remove(i.options[i.selectedIndex]);
+        for(var j=0;j<item.length;j++){
+          if(!isNaN(item[j]) && item[j] != ' '){
+            k = j;
+            break;
+          }
+        }
+        console.log(k);
+        console.log(item[k]);
+        item = item.slice(k);
+        item = parseInt(item);
+        --item;
+        if(item > 0){
+          $('#items').append("<option class='attack boost'>Attack Boost x" + item + "</option>");
+        }
+      } else {
+          document.getElementById('info').innerHTML += 'You can only use one attack boost at a time.<br>';
+      }
+  }
   $("html, body").animate({ scrollTop: $(document).height() }, 1000);
 };
 verbs.switchLoc = function(choice) {
@@ -674,7 +753,8 @@ verbs.leave = function() {
   $("html, body").animate({ scrollTop: $(document).height() }, 1000);
 };
 verbs.run = function(){
-  if (Math.floor(Math.random() * 99) < 75){
+  if(realm == 'overworld'){
+    if (Math.floor(Math.random() * 99) < 75){
     document.getElementById('info').innerHTML += 'Got away safely!<br>';
     $('#forms').attr('class','general');
     return false;
@@ -720,7 +800,7 @@ verbs.run = function(){
     document.body.style.color = "#0f0";
     $("button").css("background-color", "#0f0");
     $("input").css("color", "#0f0");
-    $('select').css('color','#0f0')  
+    $('select').css('color','#0f0');  
   }
   if (health <= 0) {
     $("#over").show();
@@ -731,19 +811,93 @@ verbs.run = function(){
   }
   $("html, body").animate({ scrollTop: $(document).height() }, 1000);
   }
+  } else {
+    if (Math.floor(Math.random() * 99) < 60){
+    document.getElementById('info').innerHTML += 'Got away safely!<br>';
+    $('#forms').attr('class','general');
+    return false;
+  } else {
+    document.getElementById('info').innerHTML += 'You tripped!<br>';
+    var hasAShield = false;
+  $.each(inventory, function() {
+    if (this == "shield") {
+      hasAShield = true;
+    }
+  });
+  var damage;
+  var rndm = Math.round(Math.random() * 8 + 1) - 4;
+  if (hasAShield) {
+    health -= enemies[enemy].attack - shields[shieldName].defense + rndm;
+    damage = enemies[enemy].attack - shields[shieldName].defense + rndm;
+  } else {
+    health -= enemies[enemy].attack + rndm;
+    damage = enemies[enemy].attack + rndm;
+  }
+  if (health < 0) {
+    health = 0;
+  }
+  document.getElementById("info").innerHTML +=
+    "You took " +
+    damage +
+    " damage.<br>You have " +
+    health +
+    " health remaining.<br>";
+  if (health <= maxHealth * 0.25) {
+    document.body.style.color = "#f80";
+    $("button").css("background-color", "#f80");
+    $("input").css("color", "#f80");
+    $('select').css('color','#f80');
+  }
+  if (health <= maxHealth * 0.0625) {
+    document.body.style.color = "#f00";
+    $("button").css("background-color", "#f00");
+    $("input").css("color", "#f00");
+    $('select').css('color','#f00');
+  }
+  if(health > maxHealth * 0.25){
+    document.body.style.color = "#0f0";
+    $("button").css("background-color", "#0f0");
+    $("input").css("color", "#0f0");
+    $('select').css('color','#0f0');  
+  }
+  if (health <= 0) {
+    $("#over").show();
+    $("html, body").animate({ scrollTop: $(document).height() }, 1000);
+    var over = setTimeout(del, 9001);
+    $("#forms").attr("class", "nope");
+    return false;
+  }
+  $("html, body").animate({ scrollTop: $(document).height() }, 1000);
+  }
+  }
+};
+verbs.effectCheck = function(){
+    if(hisTurnCounter == effects.attack){
+      swords[swordName].power /= 2;
+      attackBoosted = false;
+      document.getElementById('info').innerHTML += 'Your attack boost wore off.<br>'
+      delete effects.attack;
+    }
 }
 function combat(en) {
+  myTurnCounter = 0;
+  hisTurnCounter = 0;
   itemsIndex = 0;
+  effects = [];
+  attackBoosted = false;
   enemy = en;
   $("#forms").attr("class", "combat");
   switch(enemy){
   case 'generic':
   document.getElementById("info").innerHTML +=
-  "It is a generic Shadow Creature.<br>";
+  "It is a Shadow's Apprentice.<br>";
   break;
   case 'fire':
   document.getElementById('info').innerHTML += 'It is the Dragon of Fire!<br>';
   break;
+    case 'water':
+      document.getElementById('info').innerHTML += 'It is the Dragon of Water!<br>';
+      break;
   }
   enemyHealth = enemies[enemy].health;
   var hasASword = false;
@@ -759,11 +913,24 @@ function combat(en) {
     return false;
   }
   $("#items").html("");
+  var itemCount = 0;
   $.each(inventory, function() {
     if (this == "potion") {
-      $("#items").append("<option>Potion</option>");
+      itemCount++;
     }
   });
+  if(itemCount > 0){
+    $("#items").append("<option class='potion'>Potion x" + itemCount + "</option>");
+  }
+  itemCount = 0;
+  $.each(inventory,function(){
+    if (this == 'attack boost'){
+       itemCount++;
+    }
+  });
+  if(itemCount > 0){
+    $('#items').append("<option class='attack boost'>Attack Boost x" + itemCount + "</option>");
+  }
 }
 function landedOnStore() {
   $("#forms").attr("class", "store");
@@ -796,4 +963,16 @@ function del() {
   document.body.removeAttribute("style");
   document.body.innerHTML =
     "<h1>Error 404</h1>You died and took the page down with you!";
+}
+verbs.levelCheck = function(){
+      var leveledUp;
+      do{
+        leveledUp = false;
+        if(xp >= criteria[myLevel+1]){
+          myLevel++;
+          document.getElementById('info').innerHTML += 'You grew to level ' + myLevel + '!<br>';
+          leveledUp = true;
+        }
+      } while(leveledUp);
+      return false;
 }

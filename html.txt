@@ -12,7 +12,8 @@
   background-color: #000;
   color: #0f0;font-size:24px'>
   <div id='intro'>
-<pre>oooooooooooo               .                             .o88o.          .   oooo                  
+<pre>
+oooooooooooo               .                             .o88o.          .   oooo                  
 `888'     `8             .o8                             888 `"        .o8   `888                  
  888          .oooo.   .o888oo  .ooooo.        .ooooo.  o888oo       .o888oo  888 .oo.    .ooooo.  
  888oooo8    `P  )88b    888   d88' `88b      d88' `88b  888           888    888P"Y88b  d88' `88b 
@@ -67,6 +68,10 @@ o8o        `8  o888o o888o o888o `Y8bod8P'      o888bood8P'   d888b    `Y888""8o
         <button type='button' id='loc1' onclick='verbs.buy("loc1")'>Location of the Fire Portal: 100</button>
         <br>
         <button type='button' id='potion' onclick='verbs.buy("potion")'>Healing Potion: 16</button>
+        <br>
+        <button type='button' id='attackBoost' onclick='verbs.buy("attack boost")'>Attack Boost: 32</button>
+        <br>
+        <button type='button' id='loc2' onclick='verbs.buy("loc2");return false;'>Location of the Water Portal: 150</button>
         <br>
         <button type='button' id='leave' onclick='$("#forms").attr("class","general");'>Leave</button>
       </form>
