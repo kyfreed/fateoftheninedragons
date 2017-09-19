@@ -1,5 +1,27 @@
+var turn;
+var save;
+var loc1;
+var loc2;
+var accuracy = 99;
+var burning = false;
+var sprayed = false;
+var realmIn = false;
+var k = document.getElementById("attacks");
+var realmCorrelation = {
+  "the Fire Key": "loc1",
+  "the Water Key": "loc2",
+  "the Ice Key": "loc3"
+};
+var locs = {
+  loc1: [],
+  loc2: [],
+  loc3: []
+};
+var z = document.getElementById("locs");
 $("#over").hide();
-var realmArray = ["", "fire",'water'];
+$("#health").hide();
+var myAttacks = {};
+var realmArray = ["", "fire", "water", "ice"];
 var realm = "overworld";
 var realms = {
   overworld: {
@@ -13,10 +35,15 @@ var realms = {
   water: {
     maxUp: 99,
     maxRight: 99
+  },
+  metal: {
+    maxUp: 127,
+    maxRight: 127
   }
 };
+var enemyAttacks = {};
 var xp;
-var criteria = ['','',32,50,100,150,200,256,300,350];
+var criteria = ["", "", 32, 50, 100, 150, 200, 256, 300, 350, 450];
 var myLevel;
 var dragonName;
 var attackBoosted;
@@ -29,19 +56,48 @@ var enemies = {
     attack: 16,
     defense: 1,
     winnings: 16,
-    xp:8
+    xp: 8,
+    attacks: ["punch"],
+    name: "Shadow's Apprentice"
+  },
+  fireGeneric: {
+    health: 75,
+    attack: 20,
+    defense: 4,
+    winnings: 20,
+    xp: 10,
+    attacks: ["punch", "fireball"],
+    name: "Fire Mage"
+  },
+  waterGeneric: {
+    health: 90,
+    attack: 25,
+    defense: 5,
+    winnings: 32,
+    xp: 16,
+    attacks: ["punch", "spray"],
+    name: "DHMO Sorcerer"
+  },
+  tin: {
+    health: 100,
+    attack: 32,
+    defense: 8,
+    winnings: 64,
+    xp: 32,
+    attacks: ["punch", "spear", "corrode"]
   },
   fire: {
     health: 128,
     attack: 64,
     defense: 0,
-    xp:128
+    xp: 128,
+    attacks: ["punch", "fireball"]
   },
   water: {
     health: 150,
     attack: 75,
     defense: 4,
-    xp:256
+    xp: 256
   }
 };
 var turn;
@@ -60,10 +116,11 @@ var maxHealth;
 var gold;
 var maxGold;
 var inventory = [];
-var stores = [[50, 50], [21, 14], [300, 320], [91, 80], [20, 2]];
-var inns = [[51, 50], [60, 40], [506, 370], [2000, 2000], [500, 500]];
-var loc1 = [Math.floor(Math.random()*255),Math.floor(Math.random()*255)];
-var loc2 = [Math.floor(Math.random()*324),Math.floor(Math.random()*324)];
+var villages = [[50, 50], [21, 14], [300, 320], [91, 80], [20, 2],[51, 50],[60, 40],
+[506, 370],
+[2000, 2000],
+[500, 500],
+[1024, 1024]];
 var swordUpgrades;
 var swordName = "traveler's sword";
 var shieldName;
@@ -72,7 +129,7 @@ var swords = {
     power: 16,
     level: 1,
     maxLevel: 16,
-    element:null
+    element: null
   }
 };
 var shields = {
@@ -85,55 +142,32 @@ var shields = {
 function play(load) {
   $("#forms").attr("class", "general");
   if (load) {
-    var save = prompt("Enter your save string:");
-    while (save[0] != "z") {
-      var namesub = save.slice(0, save.indexOf("x"));
-      var namesub2 = parseInt(namesub, 16);
-      name += String.fromCharCode(namesub2);
-      namesub2 = namesub2.toString();
-      save = save.slice(namesub.length + 1);
+    name = localStorage.name;
+    coordinates = JSON.parse(localStorage.coordinates);
+    health = localStorage.health;
+    maxHealth = localStorage.maxHealth;
+    gold = localStorage.gold;
+    maxGold = localStorage.maxGold;
+    inventory = JSON.parse(localStorage.inventory);
+    xp = localStorage.xp;
+    locs.loc1 = JSON.parse(localStorage.loc1);
+    locs.loc2 = JSON.parse(localStorage.loc2);
+    locs.loc3 = JSON.parse(localStorage.loc3);
+    swordName = localStorage.swordName;
+    shieldName = localStorage.shieldName;
+    myLevel = localStorage.myLevel;
+    if (inventory.includes("shield")) {
+      $("#attacks").append("<option>Defend</option>");
     }
-    save = save.slice(1);
-    var substring = parseInt(save.slice(0, save.indexOf("z")), 16);
-    coordinates[0] = substring;
-    substring = substring.toString();
-    save = save.slice(substring.length + 1);
-    substring = parseInt(save.slice(0, save.indexOf("z")), 16);
-    coordinates[1] = substring;
-    substring = substring.toString();
-    save = save.slice(substring.length + 1);
-    substring = parseInt(save.slice(0, save.indexOf("z")), 16);
-    health = substring;
-    substring = substring.toString();
-    save = save.slice(substring.length + 1);
-    substring = parseInt(save.slice(0, save.indexOf("z")), 16);
-    maxHealth = substring;
-    substring = substring.toString();
-    save = save.slice(substring.length + 1);
-    substring = parseInt(save.slice(0, save.indexOf("z")), 16);
-    gold = substring;
-    substring = substring.toString();
-    save = save.slice(substring.length + 1);
-    substring = parseInt(save.slice(0, save.indexOf("z")), 16);
-    maxGold = substring;
-    substring = substring.toString();
-    save = save.slice(substring.length);
-    while (save[0] != "z") {
-      while (save[0] != "y") {
-        var invsub = save.slice(0, save.indexOf("x"));
-        var invsub2 = parseInt(invsub, 16);
-        invstring += String.fromCharCode(invsub2);
-        invsub2 = invsub2.toString();
-        save = save.slice(invsub.length + 1);
-      }
-      inventory.push(invstring);
-      invstring = "";
-      save = save.slice(1);
+    if (inventory.includes("loc1")) {
+      $("#locs").append("<option>the Fire Portal</option>");
     }
-    inventory[0] = inventory[0].slice(9);
+    if (inventory.includes("loc2")) {
+      $("#locs").append("<option>the Water Portal</option>");
+    }
   } else {
     name = prompt("What is your name?");
-    inventory = ['sword']
+    inventory = ["sword"];
     coordinates = [0, 0];
     health = 256;
     maxHealth = 256;
@@ -141,23 +175,56 @@ function play(load) {
     maxGold = 100;
     xp = 0;
     myLevel = 1;
-    
+    locs.loc1 = [
+      Math.floor(Math.random() * 255),
+      Math.floor(Math.random() * 255)
+    ];
+    locs.loc2 = [
+      Math.floor(Math.random() * 324),
+      Math.floor(Math.random() * 324)
+    ];
+    locs.loc3 = [
+      Math.floor(Math.random() * 511),
+      Math.floor(Math.random() * 511)
+    ];
   }
 }
-
+$('#health').innerHTML = health;
 function runCommand() {
-  var command = $("#main").val();
-  var command_words = command.split(" ");
-  var params = command_words.slice(1);
-  if (verbs[command_words[0]]) {
-    verbs[command_words[0]](params);
+  var dir;
+  switch ($("#arr").find(":selected").text()) {
+    case "\u2190":
+      dir = "west";
+      break;
+    case "\u2191":
+      dir = "north";
+      break;
+    case "\u2192":
+      dir = "east";
+      break;
+    case "\u2193":
+      dir = "south";
+      break;
+    case "\u2196":
+      dir = "northwest";
+      break;
+    case "\u2197":
+      dir = "northeast";
+      break;
+    case "\u2198":
+      dir = "southeast";
+      break;
+    case "\u2199":
+      dir = "southwest";
+      break;
   }
-  $("#main").val("");
+  verbs[dir](parseInt($("#num").val()));
+  $("#num").val("");
   $("html, body").animate({ scrollTop: $(document).height() }, 1000);
-  if (coordinates[0] == loc1[0] && coordinates[1] == loc1[1]) {
+  if (coordinates[0] == locs.loc1[0] && coordinates[1] == locs.loc1[1]) {
     verbs.switchLoc("fire");
   }
-  if (coordinates[0] == loc2[0] && coordinates[1] == loc2[1]) {
+  if (coordinates[0] == locs.loc2[0] && coordinates[1] == locs.loc2[1]) {
     verbs.switchLoc("water");
   }
   if (coordinates[0] == 0 && coordinates[1] == 0 && realm != "overworld") {
@@ -172,25 +239,29 @@ function runCommand() {
   ) {
     combat(realm);
   }
-  if(realm == 'overworld'){
-    for (var i = 0; i < stores.length; i++) {
-      if (stores[i][0] == coordinates[0] && stores[i][1] == coordinates[1]) {
-      landedOnStore();
+  if (realm == "overworld") {
+    for (var i = 0; i < villages.length; i++) {
+      if (villages[i][0] == coordinates[0] && villages[i][1] == coordinates[1]) {
+        landedOnVillage();
       }
-    }  
-  }
-  if(realm == 'overworld'){
-      for (var i = 0; i < inns.length; i++) {
-        if (inns[i][0] == coordinates[0] && inns[i][1] == coordinates[1]) {
-          landedOnInn();
-        }
-      }  
-  }
-   if (say) {
-      document.getElementById("info").innerHTML +=
-        "You encountered an enemy!<br>";
-      combat("generic");
     }
+  }
+  if (say) {
+    document.getElementById("info").innerHTML +=
+      "You encountered an enemy!<br>";
+
+    switch (realm) {
+      case "overworld":
+        combat("generic");
+        break;
+      case "fire":
+        combat("fireGeneric");
+        break;
+      case "water":
+        combat("waterGeneric");
+        break;
+    }
+  }
 }
 verbs = {};
 verbs.east = function(num) {
@@ -204,9 +275,8 @@ verbs.east = function(num) {
       break;
     }
   }
-  if ((coordinates[0] += count <= realms[realm].maxRight)) {
+  if (coordinates[0] + count <= realms[realm].maxRight) {
     coordinates[0] += count;
-    coordinates[0] -= 1;
     document.getElementById("info").innerHTML +=
       "You moved " +
       count +
@@ -423,30 +493,22 @@ verbs.northeast = function(num) {
   }
 };
 verbs.save = function() {
-  console.log(name);
-  var hex = "";
-  for (var i = 0; i < name.length; i++) {
-    hex += name.charCodeAt(i).toString(16) + "x";
-  }
-  hex += "z";
-  hex += coordinates[0].toString(16) + "z";
-  hex += coordinates[1].toString(16) + "z";
-  hex += health.toString(16) + "z";
-  hex += maxHealth.toString(16) + "z";
-  hex += gold.toString(16) + "z";
-  hex += maxGold.toString(16) + "z";
-  $.each(inventory, function() {
-    for (var i = 0; i < this.length; i++) {
-      hex += this.charCodeAt(i).toString(16) + "x";
-    }
-    hex += "y";
-  });
-  hex += "z";
-  hex += xp.toString(16) + 'z';
-  prompt(
-    "Here is your save string. Copy it and paste it in a safe place.",
-    hex
-  );
+  localStorage.name = name;
+  localStorage.coordinates = JSON.stringify(coordinates);
+  localStorage.health = health;
+  localStorage.maxHealth = maxHealth;
+  localStorage.gold = gold;
+  localStorage.maxGold = maxGold;
+  localStorage.inventory = JSON.stringify(inventory);
+  localStorage.xp = xp;
+  localStorage.myLevel = myLevel;
+  localStorage.loc1 = JSON.stringify(locs.loc1);
+  localStorage.loc2 = JSON.stringify(locs.loc2);
+  localStorage.swordName = swordName;
+  localStorage.shieldName = shieldName;
+  localStorage.loc3 = JSON.stringify(locs.loc3);
+  document.getElementById("info").innerHTML += "Game saved.<br>";
+  $("html, body").animate({ scrollTop: $(document).height() }, 1000);
 };
 verbs.stats = function() {
   document.getElementById("info").innerHTML +=
@@ -460,7 +522,7 @@ verbs.stats = function() {
   $("html, body").animate({ scrollTop: $(document).height() }, 1000);
 };
 verbs.buy = function(par) {
-  if ($("#forms.store").length) {
+  if ($("#forms.equipment").length || $("#forms.magic").length) {
     switch (par) {
       case "traveler's shield":
         if (gold - 50 >= 0) {
@@ -471,6 +533,7 @@ verbs.buy = function(par) {
             "You bought a traveler's shield!<br>You have " +
             gold +
             " gold remaining.<br>";
+          $("#attacks").append("<option>Defend</option>");
           $("#shield").hide();
           break;
         } else {
@@ -486,6 +549,7 @@ verbs.buy = function(par) {
             " gold remaining.<br>";
           inventory.push("loc1");
           $("#loc1").hide();
+          $("#locs").append("<option>the Fire Portal</option>");
           break;
         } else {
           document.getElementById("info").innerHTML += "That's too much!<br>";
@@ -516,45 +580,49 @@ verbs.buy = function(par) {
         }
         break;
       case "loc2":
-       if (gold - 150 >= 0) {
-         inventory.push("loc2");
-         gold -= 150;
-         document.getElementById("info").innerHTML +=
-           "You bought the location of the Water Portal!<br>You have " +
-           gold +
-           " gold remaining.<br>";
-       } else {
-         document.getElementById("info").innerHTML += "That's too much!<br>";
-       }
+        if (gold - 150 >= 0) {
+          inventory.push("loc2");
+          gold -= 150;
+          document.getElementById("info").innerHTML +=
+            "You bought the location of the Water Portal!<br>You have " +
+            gold +
+            " gold remaining.<br>";
+          $("#locs").append("<option>the Water Portal</option>");
+        } else {
+          document.getElementById("info").innerHTML += "That's too much!<br>";
+        }
         break;
-        
+      case "loc3":
+        if (gold - 200 >= 0) {
+          inventory.push("loc3");
+          gold -= 200;
+          document.getElementById("info").innerHTML +=
+            "You bought the location of the Metal Portal!<br>You have " +
+            gold +
+            " gold remaining.<br>";
+          $("#locs").append("<option>the Metal Portal</option>");
+        } else {
+          document.getElementById("info").innerHTML += "That's too much!<br>";
+        }
+        $("html, body").animate({ scrollTop: $(document).height() }, 1000);
     }
-    $("html, body").animate({ scrollTop: $(document).height() }, 1000);
   }
 };
 verbs.attack = function() {
-  var keys = Object.keys(enemies);
-  var realmIn = false;
-  $.each(keys,function(){
-    if(this == realm){
-      realmIn = true;
+  if (Math.floor(Math.random() * accuracy) < 100) {
+    switch (k.options[k.selectedIndex].text) {
+      case "Swing Sword":
+        myAttacks.swing();
+        break;
+      case "Defend":
+        myAttacks.defend();
     }
-  });
-  var enemyDefense = enemies[enemy].defense;
-  var rndm = Math.round(Math.random() * 8 + 1) - 4;
-  console.log(rndm);
-  var damage = swords[swordName].power - enemyDefense + rndm + 8 * (myLevel - 1);
-  enemyHealth = enemyHealth - damage;
-  console.log(enemyHealth);
-  if (Math.random() * 99 < 4.6875 * swords[swordName].level) {
-    document.getElementById("info").innerHTML += "Critical hit!<br>";
-    damage *= 2;
+  } else {
+    document.getElementById("info").innerHTML += "Your attack missed!<br>";
   }
-  document.getElementById("info").innerHTML +=
-    "The enemy took " + damage + " damage.<br>";
   if (enemyHealth <= 0) {
-    document.getElementById('info').innerHTML += 'You won!<br>';
-    if(realmIn){
+    document.getElementById("info").innerHTML += "You won!<br>";
+    if (realmIn) {
       maxGold += 50;
       gold = maxGold;
       verbs.leave();
@@ -567,58 +635,42 @@ verbs.attack = function() {
         gold = maxGold;
       }
       document.getElementById("info").innerHTML +=
-      "You won " + winnings + " gold!<br>";
+        "You won " + winnings + " gold!<br>";
     }
-      xp += enemies[enemy].xp;
-      document.getElementById('info').innerHTML += 'You gained ' + enemies[enemy].xp + 'XP!<br>';
-      verbs.levelCheck();
+    xp += enemies[enemy].xp;
+    document.getElementById("info").innerHTML +=
+      "You gained " + enemies[enemy].xp + "XP!<br>";
+    verbs.levelCheck();
     $("html, body").animate({ scrollTop: $(document).height() }, 1000);
     $("#forms").attr("class", "general");
-      effects = {};
+    effects = {};
     return false;
   }
   myTurnCounter++;
+  turn = 0;
   verbs.effectCheck();
-  var hasAShield = false;
-  $.each(inventory, function() {
-    if (this == "shield") {
-      hasAShield = true;
-    }
-  });
-  rndm = Math.round(Math.random() * 8 + 1) - 4;
-  if (hasAShield) {
-    health -= enemies[enemy].attack - shields[shieldName].defense + rndm;
-    damage = enemies[enemy].attack - shields[shieldName].defense + rndm;
-  } else {
-    health -= enemies[enemy].attack + rndm;
-    damage = enemies[enemy].attack + rndm;
-  }
+  var rndm = Math.floor(Math.random() * enemies[enemy].attacks.length);
+  enemyAttacks[enemies[enemy].attacks[rndm]]();
   if (health < 0) {
     health = 0;
   }
-  document.getElementById("info").innerHTML +=
-    "You took " +
-    damage +
-    " damage.<br>You have " +
-    health +
-    " health remaining.<br>";
   if (health <= maxHealth * 0.25) {
     document.body.style.color = "#f80";
     $("button").css("background-color", "#f80");
     $("input").css("color", "#f80");
-    $('select').css('color','#f80');
+    $("select").css("color", "#f80");
   }
   if (health <= maxHealth * 0.0625) {
     document.body.style.color = "#f00";
     $("button").css("background-color", "#f00");
     $("input").css("color", "#f00");
-    $('select').css('color','#f00');
+    $("select").css("color", "#f00");
   }
-  if(health > maxHealth * 0.25){
+  if (health > maxHealth * 0.25) {
     document.body.style.color = "#0f0";
     $("button").css("background-color", "#0f0");
     $("input").css("color", "#0f0");
-    $('select').css('color','#0f0');  
+    $("select").css("color", "#0f0");
   }
   if (health <= 0) {
     $("#over").show();
@@ -629,17 +681,17 @@ verbs.attack = function() {
   }
   $("html, body").animate({ scrollTop: $(document).height() }, 1000);
   hisTurnCounter++;
+  turn = 1;
   verbs.effectCheck();
 };
-verbs.location = function(num) {
-  concat = 'loc' + num.toString();
+verbs.location = function(name) {
   var locAvailable = false;
-  $.each(inventory,function(){
-    if(this == 'loc'+num.toString()){
+  $.each(inventory, function() {
+    if (this == realmCorrelation[name]) {
       document.getElementById("info").innerHTML +=
-      "That location is at " + eval(concat).toString() + ".<br>";
-    };
-});
+        "That location is at " + locs[realmCorrelation[name]] + ".<br>";
+    }
+  });
 };
 verbs.map = function() {
   var s = "";
@@ -664,62 +716,74 @@ verbs.navi = function() {
 };
 verbs.die = function() {
   document.body.removeAttribute("style");
-  document.body.innerHTML = "<h1>Error 9001</h1>You made a fatal mistake.";
+  document.body.innerHTML =
+    "<h1>Error 9001</h1>I can't believe you've done this.";
 };
 verbs.use = function() {
   var k;
-  var i = document.getElementById("items");
-  var item = i.options[i.selectedIndex].text;
-  if(item.includes('Potion')) {
-      if (health + 64 <= maxHealth) {
-        health += 64;
-      } else {
-        health = maxHealth;
+  var item = $("#items").find(":selected").text();
+  if (item.indexOf("Potion") != -1) {
+    if (health + 64 <= maxHealth) {
+      health += 64;
+    } else {
+      health = maxHealth;
+    }
+    document.getElementById("info").innerHTML +=
+      "You used a potion.<br>You regained 64 health.<br>";
+    inventory.splice(inventory.indexOf("potion"), 1);
+    var i = document.getElementById("items").selectedIndex;
+    for (var j = 0; j < item.length; j++) {
+      if (!isNaN(item[j]) && item[j] != " ") {
+        k = j;
+        break;
       }
-      document.getElementById("info").innerHTML +=
-        "You used a potion.<br>You regained 64 health.<br>";
-      inventory.splice(inventory.indexOf('potion'),1);
-      document.getElementById("items").remove(i.options[i.selectedIndex]);
-        for(var j=0;j<item.length;j++){
-          if(!isNaN(item[j]) && item[j] != ' '){
-            k = j;
-            break;
-          }
-        }
-        console.log(k);
-        console.log(item[k]);
-        item = item.slice(k);
-        item = parseInt(item);
-        --item;
-        if(item > 0){
-          $('#items').append("<option class='potion'>Potion x" + item + "</option");
-        }
+    }
+    item = item.slice(k);
+    item = parseInt(item);
+    console.log(item);
+    item--;
+    document.getElementById("items").remove(i);
+    console.log(i);
+    if (item != 0) {
+      $("#items option")
+        .eq(i)
+        .before($("<option>Potion x" + item + "</option>"));
+      document.getElementById("items").selectedIndex = i.toString();
+      i++;
+    }
+    document.getElementById("items").remove(i);
   }
-    if(item.includes('Attack Boost')){
-      if(!attackBoosted){
-        swords[swordName].power *= 2;
-        effects.attack = hisTurnCounter + 3;
-        attackBoosted = true;
-        document.getElementById('info').innerHTML += 'You used an attack boost! Your attack was doubled!<br>';
-        inventory.splice(inventory.indexOf('attack boost'),1);
-        document.getElementById("items").remove(i.options[i.selectedIndex]);
-        for(var j=0;j<item.length;j++){
-          if(!isNaN(item[j]) && item[j] != ' '){
-            k = j;
-            break;
-          }
+  if (item.indexOf("Attack Boost") != -1) {
+    if (!attackBoosted) {
+      swords[swordName].power *= 2;
+      effects.attack = hisTurnCounter + 3;
+      attackBoosted = true;
+      for (var j = 0; j < item.length; j++) {
+        if (!isNaN(item[j]) && item[j] != " ") {
+          k = j;
+          break;
         }
-        console.log(k);
-        console.log(item[k]);
-        item = item.slice(k);
-        item = parseInt(item);
-        --item;
-        if(item > 0){
-          $('#items').append("<option class='attack boost'>Attack Boost x" + item + "</option>");
-        }
-      } else {
-          document.getElementById('info').innerHTML += 'You can only use one attack boost at a time.<br>';
       }
+      item = item.slice(k);
+      item = parseInt(item);
+      console.log(item);
+      item--;
+      document.getElementById("info").innerHTML +=
+        "You used an attack boost! Your attack was doubled!<br>";
+      inventory.splice(inventory.indexOf("attack boost"), 1);
+      var i = document.getElementById("items").selectedIndex;
+      if (item != 0) {
+        $("#items option")
+          .eq(i)
+          .before($("<option>Attack Boost x" + item + "</option>"));
+        document.getElementById("items").selectedIndex = i;
+        i++;
+      }
+      document.getElementById("items").remove(i);
+    } else {
+      document.getElementById("info").innerHTML +=
+        "You can only use one attack boost at a time.<br>";
+    }
   }
   $("html, body").animate({ scrollTop: $(document).height() }, 1000);
 };
@@ -748,170 +812,189 @@ verbs.leave = function() {
   realm = "overworld";
   dragonName = "";
   coordinates = loc1;
-  $('#forms').attr('class','general');
-  document.getElementById('info').innerHTML += 'You were transported back to the normal world.<br>';
+  $("#forms").attr("class", "general");
+  document.getElementById("info").innerHTML +=
+    "You were transported back to the normal world.<br>";
   $("html, body").animate({ scrollTop: $(document).height() }, 1000);
 };
-verbs.run = function(){
-  if(realm == 'overworld'){
-    if (Math.floor(Math.random() * 99) < 75){
-    document.getElementById('info').innerHTML += 'Got away safely!<br>';
-    $('#forms').attr('class','general');
-    return false;
-  } else {
-    document.getElementById('info').innerHTML += 'You tripped!<br>';
-    var hasAShield = false;
-  $.each(inventory, function() {
-    if (this == "shield") {
-      hasAShield = true;
+verbs.run = function() {
+  if (realm == "overworld") {
+    if (Math.floor(Math.random() * 99) < 75) {
+      document.getElementById("info").innerHTML += "Got away safely!<br>";
+      $("#forms").attr("class", "general");
+      return false;
+    } else {
+      document.getElementById("info").innerHTML += "You tripped!<br>";
+      var rndm = Math.random() * enemies[enemy].attacks.length;
+      rndm = Math.floor(rndm);
+      enemyAttacks[enemies[enemy].attacks[rndm]]();
+      if (health <= maxHealth * 0.25) {
+        document.body.style.color = "#f80";
+        $("button").css("background-color", "#f80");
+        $("input").css("color", "#f80");
+        $("select").css("color", "#f80");
+      }
+      if (health <= maxHealth * 0.0625) {
+        document.body.style.color = "#f00";
+        $("button").css("background-color", "#f00");
+        $("input").css("color", "#f00");
+        $("select").css("color", "#f00");
+      }
+      if (health > maxHealth * 0.25) {
+        document.body.style.color = "#0f0";
+        $("button").css("background-color", "#0f0");
+        $("input").css("color", "#0f0");
+        $("select").css("color", "#0f0");
+      }
+      if (health <= 0) {
+        $("#over").show();
+        $("html, body").animate({ scrollTop: $(document).height() }, 1000);
+        var over = setTimeout(del, 9001);
+        $("#forms").attr("class", "nope");
+        return false;
+      }
+      $("html, body").animate({ scrollTop: $(document).height() }, 1000);
     }
-  });
-  var damage;
-  var rndm = Math.round(Math.random() * 8 + 1) - 4;
-  if (hasAShield) {
-    health -= enemies[enemy].attack - shields[shieldName].defense + rndm;
-    damage = enemies[enemy].attack - shields[shieldName].defense + rndm;
   } else {
-    health -= enemies[enemy].attack + rndm;
-    damage = enemies[enemy].attack + rndm;
-  }
-  if (health < 0) {
-    health = 0;
-  }
-  document.getElementById("info").innerHTML +=
-    "You took " +
-    damage +
-    " damage.<br>You have " +
-    health +
-    " health remaining.<br>";
-  if (health <= maxHealth * 0.25) {
-    document.body.style.color = "#f80";
-    $("button").css("background-color", "#f80");
-    $("input").css("color", "#f80");
-    $('select').css('color','#f80');
-  }
-  if (health <= maxHealth * 0.0625) {
-    document.body.style.color = "#f00";
-    $("button").css("background-color", "#f00");
-    $("input").css("color", "#f00");
-    $('select').css('color','#f00');
-  }
-  if(health > maxHealth * 0.25){
-    document.body.style.color = "#0f0";
-    $("button").css("background-color", "#0f0");
-    $("input").css("color", "#0f0");
-    $('select').css('color','#0f0');  
-  }
-  if (health <= 0) {
-    $("#over").show();
-    $("html, body").animate({ scrollTop: $(document).height() }, 1000);
-    var over = setTimeout(del, 9001);
-    $("#forms").attr("class", "nope");
-    return false;
-  }
-  $("html, body").animate({ scrollTop: $(document).height() }, 1000);
-  }
-  } else {
-    if (Math.floor(Math.random() * 99) < 60){
-    document.getElementById('info').innerHTML += 'Got away safely!<br>';
-    $('#forms').attr('class','general');
-    return false;
-  } else {
-    document.getElementById('info').innerHTML += 'You tripped!<br>';
-    var hasAShield = false;
-  $.each(inventory, function() {
-    if (this == "shield") {
-      hasAShield = true;
+    if (Math.floor(Math.random() * 99) < 60) {
+      document.getElementById("info").innerHTML += "Got away safely!<br>";
+      $("#forms").attr("class", "general");
+      return false;
+    } else {
+      document.getElementById("info").innerHTML += "You tripped!<br>";
+      var rndm = Math.floor(Math.random() * enemies[enemy].attacks.length);
+      enemyAttacks[enemies[enemy].attacks[rndm]]();
+      if (health <= maxHealth * 0.25) {
+        document.body.style.color = "#f80";
+        $("button").css("background-color", "#f80");
+        $("input").css("color", "#f80");
+        $("select").css("color", "#f80");
+      }
+      if (health <= maxHealth * 0.0625) {
+        document.body.style.color = "#f00";
+        $("button").css("background-color", "#f00");
+        $("input").css("color", "#f00");
+        $("select").css("color", "#f00");
+      }
+      if (health > maxHealth * 0.25) {
+        document.body.style.color = "#0f0";
+        $("button").css("background-color", "#0f0");
+        $("input").css("color", "#0f0");
+        $("select").css("color", "#0f0");
+      }
+      if (health <= 0) {
+        $("#over").show();
+        $("html, body").animate({ scrollTop: $(document).height() }, 1000);
+        var over = setTimeout(del, 9001);
+        $("#forms").attr("class", "nope");
+        return false;
+      }
+      $("html, body").animate({ scrollTop: $(document).height() }, 1000);
     }
-  });
-  var damage;
-  var rndm = Math.round(Math.random() * 8 + 1) - 4;
-  if (hasAShield) {
-    health -= enemies[enemy].attack - shields[shieldName].defense + rndm;
-    damage = enemies[enemy].attack - shields[shieldName].defense + rndm;
-  } else {
-    health -= enemies[enemy].attack + rndm;
-    damage = enemies[enemy].attack + rndm;
-  }
-  if (health < 0) {
-    health = 0;
-  }
-  document.getElementById("info").innerHTML +=
-    "You took " +
-    damage +
-    " damage.<br>You have " +
-    health +
-    " health remaining.<br>";
-  if (health <= maxHealth * 0.25) {
-    document.body.style.color = "#f80";
-    $("button").css("background-color", "#f80");
-    $("input").css("color", "#f80");
-    $('select').css('color','#f80');
-  }
-  if (health <= maxHealth * 0.0625) {
-    document.body.style.color = "#f00";
-    $("button").css("background-color", "#f00");
-    $("input").css("color", "#f00");
-    $('select').css('color','#f00');
-  }
-  if(health > maxHealth * 0.25){
-    document.body.style.color = "#0f0";
-    $("button").css("background-color", "#0f0");
-    $("input").css("color", "#0f0");
-    $('select').css('color','#0f0');  
-  }
-  if (health <= 0) {
-    $("#over").show();
-    $("html, body").animate({ scrollTop: $(document).height() }, 1000);
-    var over = setTimeout(del, 9001);
-    $("#forms").attr("class", "nope");
-    return false;
-  }
-  $("html, body").animate({ scrollTop: $(document).height() }, 1000);
-  }
   }
 };
-verbs.effectCheck = function(){
-    if(hisTurnCounter == effects.attack){
-      swords[swordName].power /= 2;
-      attackBoosted = false;
-      document.getElementById('info').innerHTML += 'Your attack boost wore off.<br>'
-      delete effects.attack;
+verbs.effectCheck = function() {
+  if (hisTurnCounter == effects.attack) {
+    swords[swordName].power /= 2;
+    attackBoosted = false;
+    document.getElementById("info").innerHTML +=
+      "Your attack boost wore off.<br>";
+    delete effects.attack;
+  }
+  if (effects.fire && turn) {
+    health -= 8;
+    document.getElementById("info").innerHTML +=
+      "You succumbed to your fire and lost 8 health.<br> You have " +
+      health +
+      " health remaining.<br>";
+  }
+  if (hisTurnCounter + 1 == effects.fire) {
+    burning = false;
+    document.getElementById("info").innerHTML +=
+      "The fire was extinguished.<br>";
+    delete effects.fire;
+  }
+  if (hisTurnCounter + 1 == effects.water) {
+    sprayed = false;
+    accuracy = 100;
+    document.getElementById("info").innerHTML += "The water cleared up.<br>";
+    delete effects.water;
+  }
+  if (hisTurnCounter == effects.shield) {
+    document.getElementById("info").innerHTML +=
+      "You withdrew your shield.<br>";
+    delete effects.shield;
+  }
+  if (myTurnCounter == effects.spear && !turn) {
+    if (!effects.shield) {
+      var damage;
+      var hasAShield = false;
+      $.each(inventory, function() {
+        if (this == "shield") {
+          hasAShield = true;
+        }
+      });
+      var rndm = Math.round(Math.random() * 8 + 1) - 4;
+      if (hasAShield) {
+        health -=
+          (enemies[enemy].attack - shields[shieldName].defense + rndm) * 2;
+        damage =
+          (enemies[enemy].attack - shields[shieldName].defense + rndm) * 2;
+      } else {
+        health -= (enemies[enemy].attack + rndm) * 2;
+        damage = (enemies[enemy].attack + rndm) * 2;
+      }
+      if (health < 0) {
+        health = 0;
+      }
+      document.getElementById("info").innerHTML +=
+        "The " +
+        enemies[enemy].name +
+        " thrust its spear into you.<br>You took " +
+        damage +
+        " damage.<br> You have " +
+        health +
+        " health remaining.<br>";
+    } else {
+      document.getElementById("info").innerHTML +=
+        "The attack was blocked by your shield.<br>";
     }
-}
+  }
+};
 function combat(en) {
+  turn = 1;
+  effects = {};
+  attackBoosted = false;
+  say = false;
   myTurnCounter = 0;
   hisTurnCounter = 0;
   itemsIndex = 0;
-  effects = [];
-  attackBoosted = false;
   enemy = en;
+  if (enemy == realm) {
+    realmIn = true;
+  }
   $("#forms").attr("class", "combat");
-  switch(enemy){
-  case 'generic':
-  document.getElementById("info").innerHTML +=
-  "It is a Shadow's Apprentice.<br>";
-  break;
-  case 'fire':
-  document.getElementById('info').innerHTML += 'It is the Dragon of Fire!<br>';
-  break;
-    case 'water':
-      document.getElementById('info').innerHTML += 'It is the Dragon of Water!<br>';
+  switch (enemy) {
+    case "generic":
+      document.getElementById("info").innerHTML +=
+        "It is a Shadow's Apprentice.<br>";
+      break;
+    case "fireGeneric":
+      document.getElementById("info").innerHTML += "It is a Fire Mage.<br>";
+      break;
+    case "waterGeneric":
+      document.getElementById("info").innerHTML += "It is a DHMO Sorcerer!<br>";
+      break;
+    case "fire":
+      document.getElementById("info").innerHTML +=
+        "It is the Dragon of Fire!<br>";
+      break;
+    case "water":
+      document.getElementById("info").innerHTML +=
+        "It is the Dragon of Water!<br>";
       break;
   }
   enemyHealth = enemies[enemy].health;
-  var hasASword = false;
-  $.each(inventory, function() {
-    if (this == "sword") {
-      hasASword = true;
-    }
-  });
-  if (!hasASword) {
-    document.getElementById("info").innerHTML +=
-      "However, you do not have a sword, so you are forced to run away!<br>";
-    $("#forms").attr("class", "general");
-    return false;
-  }
   $("#items").html("");
   var itemCount = 0;
   $.each(inventory, function() {
@@ -919,22 +1002,26 @@ function combat(en) {
       itemCount++;
     }
   });
-  if(itemCount > 0){
-    $("#items").append("<option class='potion'>Potion x" + itemCount + "</option>");
+  if (itemCount > 0) {
+    $("#items").append(
+      "<option class='potion'>Potion x" + itemCount + "</option>"
+    );
   }
   itemCount = 0;
-  $.each(inventory,function(){
-    if (this == 'attack boost'){
-       itemCount++;
+  $.each(inventory, function() {
+    if (this == "attack boost") {
+      itemCount++;
     }
   });
-  if(itemCount > 0){
-    $('#items').append("<option class='attack boost'>Attack Boost x" + itemCount + "</option>");
+  if (itemCount > 0) {
+    $("#items").append(
+      "<option class='attack boost'>Attack Boost x" + itemCount + "</option>"
+    );
   }
 }
 function landedOnStore() {
-  $("#forms").attr("class", "store");
-  document.getElementById("info").innerHTML += "Welcome to the store!<br>";
+  $("#forms").attr("class", "equipment");
+  document.getElementById("info").innerHTML += "You entered the equipment shop.<br>";
   var shieldAvailable = true;
   $.each(inventory, function() {
     if (this == "shield") {
@@ -944,7 +1031,7 @@ function landedOnStore() {
   $("#shield").toggle(shieldAvailable);
   var locOneAvailable = true;
   $.each(inventory, function() {
-    if (this == 'loc1') {
+    if (this == "loc1") {
       locOneAvailable = false;
     }
   });
@@ -952,27 +1039,171 @@ function landedOnStore() {
 }
 function landedOnInn() {
   document.getElementById("info").innerHTML +=
-    "You stayed at an inn. Your health has been restored.<br>";
+    "You paid 5 gold to stay at an inn. Your health has been restored.<br>";
   health = maxHealth;
+  gold -= 5;
   document.body.style.color = "#0f0";
   $("button").css("background-color", "#0f0");
   $("input").css("color", "#0f0");
-  $('select').css('color','#0f0');
+  $("select").css("color", "#0f0");
 }
 function del() {
   document.body.removeAttribute("style");
   document.body.innerHTML =
     "<h1>Error 404</h1>You died and took the page down with you!";
 }
-verbs.levelCheck = function(){
-      var leveledUp;
-      do{
-        leveledUp = false;
-        if(xp >= criteria[myLevel+1]){
-          myLevel++;
-          document.getElementById('info').innerHTML += 'You grew to level ' + myLevel + '!<br>';
-          leveledUp = true;
-        }
-      } while(leveledUp);
-      return false;
+verbs.levelCheck = function() {
+  var leveledUp;
+  do {
+    leveledUp = false;
+    if (xp >= criteria[myLevel + 1]) {
+      myLevel++;
+      document.getElementById("info").innerHTML +=
+        "You grew to level " + myLevel + "!<br>";
+      leveledUp = true;
+    }
+  } while (leveledUp);
+  return false;
+};
+enemyAttacks.punch = function() {
+  if (!effects.shield) {
+    var damage;
+    var hasAShield = false;
+    $.each(inventory, function() {
+      if (this == "shield") {
+        hasAShield = true;
+      }
+    });
+    var rndm = Math.round(Math.random() * 8 + 1) - 4;
+    if (hasAShield) {
+      health -= enemies[enemy].attack - shields[shieldName].defense + rndm;
+      damage = enemies[enemy].attack - shields[shieldName].defense + rndm;
+    } else {
+      health -= enemies[enemy].attack + rndm;
+      damage = enemies[enemy].attack + rndm;
+    }
+    if (health < 0) {
+      health = 0;
+    }
+    document.getElementById("info").innerHTML +=
+      "The " +
+      enemies[enemy].name +
+      " used Punch.<br>You took " +
+      damage +
+      " damage.<br>You have " +
+      health +
+      " health remaining.<br>";
+  }
+};
+enemyAttacks.fireball = function() {
+  if (!effects.shield) {
+    var damage;
+    var hasAShield = false;
+    $.each(inventory, function() {
+      if (this == "shield") {
+        hasAShield = true;
+      }
+    });
+    var rndm = Math.round(Math.random() * 8 + 1) - 4;
+    if (hasAShield) {
+      health -= enemies[enemy].attack - shields[shieldName].defense + rndm + 2;
+      damage = enemies[enemy].attack - shields[shieldName].defense + rndm + 2;
+    } else {
+      health -= enemies[enemy].attack + rndm + 2;
+      damage = enemies[enemy].attack + rndm + 2;
+    }
+    if (health < 0) {
+      health = 0;
+    }
+    document.getElementById("info").innerHTML +=
+      "The " +
+      enemies[enemy].name +
+      " used Fireball.<br>You took " +
+      damage +
+      " damage.<br>You have " +
+      health +
+      " health remaining.<br>";
+    if (Math.floor(Math.random() * 99) < 90 && !burning) {
+      document.getElementById("info").innerHTML += "You're burning!<br>";
+      burning = true;
+      effects.fire = myTurnCounter + 3;
+    }
+  }
+};
+enemyAttacks.spray = function() {
+  if (!effects.shield) {
+    var damage;
+    var hasAShield = false;
+    $.each(inventory, function() {
+      if (this == "shield") {
+        hasAShield = true;
+      }
+    });
+    var rndm = Math.round(Math.random() * 8 + 1) - 4;
+    if (hasAShield) {
+      health -= enemies[enemy].attack - shields[shieldName].defense + rndm + 2;
+      damage = enemies[enemy].attack - shields[shieldName].defense + rndm + 2;
+    } else {
+      health -= enemies[enemy].attack + rndm + 2;
+      damage = enemies[enemy].attack + rndm + 2;
+    }
+    if (health < 0) {
+      health = 0;
+    }
+    document.getElementById("info").innerHTML +=
+      "The " +
+      enemies[enemy].name +
+      " used Spray.<br>You took " +
+      damage +
+      " damage.<br>You have " +
+      health +
+      " health remaining.<br>";
+    if (Math.floor(Math.random() * 99) < 95 && !sprayed) {
+      document.getElementById("info").innerHTML +=
+        "You got water in your eyes!<br>Your accuracy went down.<br>";
+      sprayed = true;
+      effects.water = myTurnCounter + 5;
+      accuracy = 84;
+    }
+  }
+};
+enemyAttacks.spear = function() {
+  document.getElementById("info").innerHTML +=
+    "The " + enemies[enemy].name + " readied its spear.";
+  effects.spear = hisTurnCounter + 1;
+};
+enemyAttacks.corrode = function(){
+  document.getElementById("info").innerHTML +=
+    "The " + enemies[enemy].name + " used Corrode.";
+  effects.corrode = true;
+}
+myAttacks.swing = function() {
+  document.getElementById("info").innerHTML += "You swung your sword.<br>";
+  var enemyDefense = enemies[enemy].defense;
+  var rndm = Math.round(Math.random() * 8 + 1) - 4;
+  var damage =
+    swords[swordName].power - enemyDefense + rndm + 8 * (myLevel - 1);
+  if (damage < 0) {
+    damage = 0;
+  }
+  enemyHealth = enemyHealth - damage;
+  if (Math.random() * 99 < 4.6875 * swords[swordName].level) {
+    document.getElementById("info").innerHTML += "Critical hit!<br>";
+    damage *= 2;
+  }
+  document.getElementById("info").innerHTML +=
+    "The " + enemies[enemy].name + " took " + damage + " damage.<br>";
+};
+myAttacks.defend = function() {
+  document.getElementById("info").innerHTML +=
+    "You held out your shield. You are invencible now!<br>";
+  effects.shield = myTurnCounter + 1;
+};
+function landedOnMagic(){
+  document.getElementById('info').innerHTML += 'You entered the magic shop.<br>'
+  $("#forms").attr("class", "magic");
+}
+function landedOnVillage(){
+  document.getElementById('info').innerHTML += 'You entered a village.<br>';
+  $("#forms").attr('class',"village");
 }
